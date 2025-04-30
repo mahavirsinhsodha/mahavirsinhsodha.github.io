@@ -99,7 +99,7 @@ exit
 :: Random Typing Subroutine
 :random_typing
 setlocal EnableDelayedExpansion
-set "text=https://mscorp7.freewebhostmost.com"
+set "text=https://mscorp7.github.io/"
 for /l %%A in (0,1,35) do (
     set /a delay=!random! %% 100 + 50
     <nul set /p "=!text:~%%A,1!" & timeout /t 0 /nobreak >nul
