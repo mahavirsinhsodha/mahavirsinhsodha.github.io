@@ -401,6 +401,7 @@
             margin: 0;
             padding: 0;
             font-family:"Kdam Thmor Pro";
+  
         }
 
         .menu>li {
@@ -464,8 +465,10 @@
             }
 
             .menu {
+                 list-style-type: none;
+    display: flex;
+    gap: 0px;
                 position: absolute;
-                display: inline-block;
                 top: 0;
                 margin-top: 50px;
                 left: 0;
@@ -563,7 +566,7 @@
     z-index: 1000; /* Ensures it stays above other content */
 }
 
-.menu {
+/* .menu {
     list-style-type: none;
     display: flex;
     gap: 0px;
@@ -577,20 +580,19 @@
                 align-items: center;
                 z-index: 1;
                 font-family:"Kdam Thmor Pro";
-}
+} */
 
-.menu li a {
+/* .menu li a {
     color: white;
     text-decoration: none;
     font-weight: bold;
-    padding: 8px 12px;
 }
 
 .menu li a:hover {
    border-radius: 5px;
         color: #000000;
         background-color: #ffffff;
-}
+} */
     </style>
 
 </head>
