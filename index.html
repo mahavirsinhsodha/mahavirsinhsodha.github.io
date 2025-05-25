@@ -204,7 +204,7 @@
         /* Contact section styles */
         #contact {
             background-color: #fff;
-            padding: 50px 0;
+            padding: 64px 0;
             background: linear-gradient(aqua,white);
         }
 
@@ -585,7 +585,7 @@
 
     <section class="top-nav">
         <div>
-            <h1 style="font-size:23px; font-family:Noto Serif JP; font-weight: bolder;" id="clickText" onclick="this.innerHTML='<a href=\'https://mscorp7.github.io/\' target=\'_blank\'>https://mscorp7.github.io/</a>'">MS 株式会社</h1>
+            <h1 style="font-size:23px; font-family:Noto Serif JP; font-weight: bolder;" id="clickText" onclick="location.href='https://mscorp7.github.io/'">MS 株式会社</h1>
         </div>
         <input id="menu-toggle" type="checkbox" />
         <label class='menu-button-container' for="menu-toggle">
@@ -705,8 +705,8 @@
                 width: 100%;
             }
         }</style>
-          <section id="projects">
- <h1 style="font-family: Times;"><u>My Projects ~</u></h1>
+          <section id="projects" >
+ <h1 style="font-family: Times;" class="section-title"><u>My Projects ~</u></h1>
             <br><br>
 
             <div class="containerimg">
@@ -1052,10 +1052,10 @@ cursor: pointer;
     <hr>
     <hr>
     
-    <section id="myarts">
-    <h1><u>My ARTs ~</u></h1>
+    <section id="myarts" >
+    <h1 class="section-title"><u>My ARTs ~</u></h1>
 
-  <div class="image-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin-top: 15px;">
+  <div class="image-grid">
     <img src="artimg/i1.jpg" alt="Image 1" loading="lazy" onclick="showPopup('artimg/i1.jpg')">
     <img src="artimg/i2.jpg" alt="Image 2" loading="lazy" onclick="showPopup('artimg/i2.jpg')">
     <img src="artimg/i3.jpg" alt="Image 3" loading="lazy" onclick="showPopup('artimg/i3.jpg')">
