@@ -1232,50 +1232,85 @@ cursor: pointer;
         color: #1877f2;
     }
 </style>
-</head>
-
-<body>
-
-    <header>
-        <h4 style="font-family: 'Open Sans', sans-serif;">🌍🌎🌏~Earth, SUN Solar System, Milky Way Galaxy, Local group Galaxy, Virgo supercluster, Laniakea supercluster, Observable Universe.
-        </h4>
-    </header>
-    <div style="background-color: white;">
-        <h2 style="font-family:Kdam Thmor Pro;">&nbsp; &nbsp; &nbsp;About Us:</h2>
-    </div>
-
-    <section id="aboutus" style="background-color:#FFFFFF; color:#333333;">
-        <!-- <div class="product">
-            <img src="product1.jpg" alt="Product 1">
-            <div class="product-info">
-                <h2>Product 1</h2>
-                <p>Description of Product 1.</p>
-                <p>Price: $19.99</p>
+    <section id="aboutus" class="section">
+        <div class="container">
+            <div class="about-content">
+                <h2 class="section-title">About MS Corporation</h2>
+                <p>Welcome to MS Corporation – Your Gateway to Innovative Modern Solutions!</p>
+                <p>At MS Corporation, we believe in the transformative power of exceptional web development. As a leading player in the digital landscape, we specialize in crafting bespoke digital solutions that redefine online experiences and drive business success.</p>
+                <p>Our mission is to deliver high-quality, innovative digital products that help businesses and individuals establish a powerful online presence. With a focus on user experience, performance, and cutting-edge technology, we create solutions that stand out in today's competitive digital world.</p>
             </div>
         </div>
-
-        <div class="product">
-            <img src="product2.jpg" alt="Product 2">
-            <div class="product-info">
-                <h2>Product 2</h2>
-                <p>Description of Product 2.</p>
-                <p>Price: $29.99</p>
-            </div>
-        </div> -->
-
-        <p style="font-family:'DM Serif Display'; font-weight:900;">
-
-            Welcome to MS Web – Your Gateway to Innovative <span style="font-size: 18px;">Modern Solutions!</span> <br><br>
-
-            At MS Corporation, we believe in the transformative power of exceptional Development. As a leading
-            player in the digital landscape, we specialize in crafting bespoke modern solutions that redefine online
-            experiences and drive business success.
- 
-        </p>
-
-        <!-- Add more product entries as needed -->
-
     </section>
+        
+   
+    <style>/* About Section */
+    :root {
+            --primary-color: #1a1a2e;
+            --secondary-color: #16213e;
+            --accent-color: #0f3460;
+            --highlight-color: #e94560;
+            --text-light: #f1f1f1;
+            --text-dark: #333333;
+            --font-main: 'Open Sans', sans-serif;
+            --font-heading: 'DM Serif Display', serif;
+            --font-special: 'Old English Text MT', serif;
+            --transition: all 0.3s ease;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --border-radius: 8px;
+        }
+ h2 {
+            font-family: var(--font-heading);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+        .about-content p {
+            margin-bottom: 1rem;
+            font-size: 16px;
+        }
+section {
+            padding: 4rem 0;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            color: #000000;
+            margin: 0 auto;
+        }
+        #aboutus {
+            background-color: white;
+            padding: 4rem 0;
+            color: #000000;
+        }
+        
+        .about-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--highlight-color);
+        }
+
+        
+        </style>
+<header><h4 style="font-family: 'Open Sans', sans-serif;">🌍🌎🌏~Earth, SUN Solar System, Milky Way Galaxy, Local group Galaxy, Virgo supercluster, Laniakea supercluster, Observable Universe.
+        </h4></header>
 
     <footer><a href="LICENSE.txt" target="_blank" style="color: white; text-decoration: none;">
         <p style="font-family:Times;font-size:15px;">Copyright &copy; 2017-2025 MS Corporation<br> All rights reserved.</p></a>
