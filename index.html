@@ -159,16 +159,13 @@
         }
 
         /* Service section styles */
-      #content {
-  background: linear-gradient(to bottom, black, navy);
-  color: #fff;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-  min-height: 100vh;
-  box-sizing: border-box;
-}
+     #content {
+            
+            background-color: #fff;
+            color: #fff;
+            justify-content:center;
+            background: linear-gradient(black,navy);
+        }
 
         .container {
             text-align: center;
@@ -348,23 +345,41 @@
       /* Responsive YouTube Embed */
 
 
-.video-container {
-  position: relative;
-  width: 100%;
-  max-width: 800px;
-  aspect-ratio: 16/9; /* auto height based on width */
-  overflow: hidden;
-  border: 2px solid #fff;
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
-}
+  .video-container{
+                max-width: 100%;
 
-.video-container iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-}
+            }
+        }
 
+        /* videos projects */
+        
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%; /* Aspect ratio 16:9 */
+            height: 0;
+            overflow: hidden;
+            width:1250px;
+            background-color: #000;
+            border-radius:10px;
+            
+        }
+        
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        video {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 20px;
+            border: 2px solid black;
+        }
 
         .top-nav {
             display: flex;
