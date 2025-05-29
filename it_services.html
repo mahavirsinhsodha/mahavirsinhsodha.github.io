@@ -94,7 +94,7 @@
     /* Hero Section */
     #hero {
       position: relative;
-      height: 100vh;
+      height: 118vh;
       min-height: 700px;
       overflow: hidden;
       display: flex;
@@ -102,6 +102,16 @@
       justify-content: center;
       text-align: center;
       background: radial-gradient(ellipse at center, #0d0d2b 0%, #1a1a40 100%);
+      padding: 100px 20px;
+    }
+
+    #hero h1 {
+      font-size: 2.8rem;
+    }
+
+    #hero p {
+      font-size: 1.2rem;
+      color: #cccccc;
     }
 
     .carousel {
@@ -133,12 +143,11 @@
       position: relative;
       z-index: 2;
       padding: 20px;
-      max-width: 900px;
       margin: 0 auto;
     }
 
     .hero-content h1 {
-      font-size: 3.5rem;
+      font-size: 2.8rem;
       color: var(--primary);
       text-shadow: 0 0 15px rgba(0, 240, 255, 0.7);
       margin-bottom: 20px;
@@ -146,7 +155,7 @@
     }
 
     .hero-content p {
-      font-size: 1.3rem;
+      font-size: 1.2rem;
       color: var(--text-light);
       margin-bottom: 30px;
       animation: fadeInUp 1s ease 0.3s forwards;
@@ -214,31 +223,39 @@
     }
 
     .services-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 30px;
-      position: relative;
-      z-index: 1;
-    }
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Changed from 280px to 250px */
+  gap: 30px;
+  position: relative;
+  z-index: 1;
+}
+
+
 
     .service-card {
       background: rgba(26, 26, 46, 0.7);
       padding: 40px 30px;
       border-radius: 15px;
-      transition: all 0.4s ease;
       border: 1px solid rgba(0, 240, 255, 0.1);
       backdrop-filter: blur(5px);
       text-align: center;
       position: relative;
       overflow: hidden;
+      transition: 
+    transform 0.3s ease,
+    box-shadow 0.3s ease,
+    border 0.3s ease,
+    background 0.3s ease !important;
     }
 
+  
     .service-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 15px 30px rgba(0, 240, 255, 0.15);
-      border: 1px solid rgba(0, 240, 255, 0.3);
-      background: rgba(26, 26, 46, 0.9);
-    }
+      transform: translateY(-8px) !important;
+  box-shadow: 0 20px 40px rgba(0, 255, 255, 0.2) ;
+  border: 1px solid #00ffff33 ;
+  background: rgba(21, 21, 33, 0.9) !important;
+}
+    
 
     .service-card::before {
       content: '';
@@ -923,7 +940,7 @@
   </footer>
   <div class="footer-bottom">
     <div class="container">
-      <p>&copy; 2025 MSCorp IT Services. All Rights Reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
+      <p>&copy; 2025 MS - IT Services. All Rights Reserved. | <a href="#">Privacy Policy</a> | <a href="#">Terms of Service</a></p>
     </div>
   </div>
 
