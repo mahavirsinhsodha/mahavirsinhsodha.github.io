@@ -1,1 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice-Controlled Web App</title>
+    <style>
+        body {
+    font-family: 'Segoe UI', sans-serif;
+    padding: 0;
+    margin: 0;
+    background: linear-gradient(135deg, #f8f9fa, #e0eafc);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
 
+h1 {
+    font-size: 2.5rem;
+    color: #2c3e50;
+    margin-top: 40px;
+    text-align: center;
+}
+
+#status {
+    font-size: 1rem;
+    color: #e74c3c;
+    margin: 10px 0 20px;
+    text-align: center;
+}
+
+#start-btn {
+    width: 220px;
+    padding: 15px;
+    font-size: 1.1rem;
+    background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-bottom: 30px;
+}
+
+#start-btn:hover {
+    background-color: #c0392b;
+}
+
+.section {
+    max-width: 900px;
+    width: 90%;
+    padding: 30px 20px;
+    margin: 30px auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    display: none;
+    text-align: center;
+}
+
+.section.active {
+    display: block;
+}
+
+.image-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60vh;
+    margin-top: 20px;
+}
+
+.image-container img {
+    width: 100%;
+    max-width: 600px;
+    max-height: 100%;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    object-fit: contain;
+}
+
+.navigation {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+.navigation button {
+    padding: 12px 25px;
+    font-size: 1rem;
+    border-radius: 10px;
+    border: none;
+    background-color: #3498db;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.navigation button:hover {
+    background-color: #2980b9;
+}
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2rem;
+    }
+
+    .image-container {
+        height: 40vh;
+    }
+
+    #start-btn {
+        width: 180px;
+        font-size: 1rem;
+    }
+}
+
+    </style>
+</head>
+<body>
+
+    <h1>Voice-Controlled Web App</h1>
+
+    <button id="start-btn">Start Listening</button>
+    <p id="status">Status: Waiting for command...</p>
+
+    <div class="navigation">
+        <button onclick="navigate('home')">Home</button>
+        <button onclick="navigate('about')">About</button>
+        <button onclick="navigate('contact')">Contact</button>
+        <button onclick="navigate('gallery')">Gallery</button>
+    </div>
+
+    <div id="home" class="section active">
+       
+        
+       <h1>Welcome to LightX </h1>
+  <p>Your trusted partner in innovative software solutions. At LightX, we believe in creating powerful, scalable, and user-friendly applications that help businesses succeed in the digital era. Our solutions are tailored to meet your specific needs, whether it's web development, mobile apps, or AI solutions.</p>
+  <p>Explore our range of services below and see how we can help you take your business to the next level.</p>
+    </div> 
+
+
+    <div id="about" class="section">
+       <h1>About LightX</h1>
+       <style>.responsive-logo {
+        max-width: 50%;
+        height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+    
+    .logo-container {
+        padding: 20px;
+        text-align: center;
+    }
+    </style>
+       <div class="logo-container">
+        <img src="LightX Corp..png" alt="LightX Logo" class="responsive-logo">
+      </div>
+       <p>LightX is Subsidiary brand of MS Corporation is a leading technology firm specializing in providing cutting-edge solutions for businesses across the globe. Founded with the vision of transforming ideas into reality, our team of experts works relentlessly to build software products that exceed expectations.</p>     
+    </div>
+
+    <div id="contact" class="section">
+       <h1>Contact Us</h1>
+       <p>If you have any questions or would like to discuss a potential project, feel free to get in touch with us. We are happy to help you with your requirements.</p>
+       
+       <h2>Our Office</h2>
+       <p><strong>LightX</strong><br>
+          EARTH<br>
+          OBSERVABLE UNIVERSE</p>
+       
+       <h2>Email</h2>
+       <p><a href="mailto:mahavirsinhsodha777@outlook.com">info@lightx/mscorp.com</a></p>
+     
+       <h2>Phone</h2>
+       <p>+91 72018 07642</p>
+    </div>
+
+    <!-- Image Gallery Section -->
+    <div id="gallery" class="section">
+        <h2>Image Gallery</h2>
+        <div class="image-container" id="gallery-image-container">
+            <img src="1.png" id="gallery-image" />
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
