@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Finger Gesture Background Control</title>
+  <style>
+    body {
+      margin: 0;
+      transition: background 0.4s ease;
+      font-family: sans-serif;
+      overflow: hidden;
+    }
+    video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      transform: scaleX(-1);
+      z-index: -1;
+      opacity: 0.2;
+    }
+    #info {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      font-size: 2rem;
+      padding: 10px 20px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <video id="video" autoplay playsinline></video>
+  <div id="info">Show 1-5 fingers</div>
+
+  <!-- MediaPipe Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+  <script>
+    const videoElement = document.getElementById('video');
+    const info = document.getElementById('info');
+    let lastCount = -1;
+
+    // Set up camera
+    const camera = new Camera(videoElement, {
+      onFrame: async () => {
+        await hands.send({ image: videoElement });
+      },
+      width: 640,
+      height: 480
+    });
+
+    // Hand tracking setup
+    const hands = new Hands({
+      locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+    });
+
+    hands.setOptions({
+      maxNumHands: 1,
+      modelComplexity: 1,
+      minDetectionConfidence: 0.8,
+      minTrackingConfidence: 0.5
+    });
+
+    hands.onResults(results => {
+      if (results.multiHandLandmarks.length > 0) {
+        const landmarks = results.multiHandLandmarks[0];
+        const fingerCount = detectFingers(landmarks);
+
+        if (fingerCount !== lastCount) {
+          lastCount = fingerCount;
+          info.innerText = `Fingers: ${fingerCount}`;
+
+          const colors = ['black', 'red', 'green', 'blue', 'purple', 'orange'];
+          document.body.style.background = colors[fingerCount] || 'black';
+        }
+      }
+    });
+
+    camera.start();
+
+    // Accurate Finger Counting
+    function detectFingers(landmarks) {
+      const tips = [4, 8, 12, 16, 20];
+      let count = 0;
+
+      // Thumb (compare x for right hand)
+      if (landmarks[4].x > landmarks[3].x) count++;
+
+      // Fingers (compare y of tip with PIP joint)
+      if (landmarks[8].y < landmarks[6].y) count++; // Index
+      if (landmarks[12].y < landmarks[10].y) count++; // Middle
+      if (landmarks[16].y < landmarks[14].y) count++; // Ring
+      if (landmarks[20].y < landmarks[18].y) count++; // Pinky
+
+      return count;
+    }
+  </script>
+</body>
+</html>

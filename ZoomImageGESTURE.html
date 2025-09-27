@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hand Gesture Zoom Gallery</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      overflow: hidden;
+    }
+    video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      z-index: -1;
+      opacity: 0.2;
+    }
+    #info {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      font-size: 2rem;
+      padding: 10px 20px;
+      border-radius: 10px;
+    }
+    .image-container {
+      display: none;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      transition: transform 0.2s ease;
+    }
+    .image-container.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <video id="video" autoplay playsinline></video>
+  <div id="info">Pinch to Zoom In / Out</div>
+
+  <div class="image-container" id="image1">
+    <img src="sunset-moon-synthwave-night-scenery-digital-art-4k-wallpaper-uhdpaper.com-429@5@c.jpg" alt="Image 1" style="width: 100%; height: 100%; object-fit: cover;" />
+
+
+  <!-- MediaPipe Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+  <script>
+    const videoElement = document.getElementById('video');
+    const info = document.getElementById('info');
+    const images = document.querySelectorAll('.image-container');
+    let currentImage = 0; // Start at image 1
+    let lastPinchDistance = null; // To track the pinch distance
+    let zoomLevel = 1; // Initial zoom level
+
+    // Set up camera
+    const camera = new Camera(videoElement, {
+      onFrame: async () => {
+        await hands.send({ image: videoElement });
+      },
+      width: 640,
+      height: 480
+    });
+
+    // Hand tracking setup
+    const hands = new Hands({
+      locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+    });
+
+    hands.setOptions({
+      maxNumHands: 1,
+      modelComplexity: 1,
+      minDetectionConfidence: 0.8,
+      minTrackingConfidence: 0.5
+    });
+
+    hands.onResults(results => {
+      if (results.multiHandLandmarks.length > 0) {
+        const landmarks = results.multiHandLandmarks[0];
+        const thumb = landmarks[4]; // Thumb tip
+        const index = landmarks[8]; // Index tip
+
+        // Calculate the distance between thumb and index fingers
+        const distance = Math.sqrt(Math.pow(index.x - thumb.x, 2) + Math.pow(index.y - thumb.y, 2));
+
+        // If lastPinchDistance is available, calculate zoom
+        if (lastPinchDistance !== null) {
+          const pinchDelta = distance - lastPinchDistance;
+          zoomLevel += pinchDelta * 5; // Zoom sensitivity factor
+
+          // Limit zoom range (prevent infinite zooming)
+          zoomLevel = Math.max(0.5, Math.min(zoomLevel, 3));
+
+          // Apply zoom effect
+          images.forEach(image => {
+            image.style.transform = `scale(${zoomLevel})`;
+          });
+        }
+
+        // Update last pinch distance for next frame
+        lastPinchDistance = distance;
+      }
+    });
+
+    camera.start();
+
+    // Initial setup: Show first image
+    images[currentImage].classList.add('active');
+  </script>
+</body>
+</html>

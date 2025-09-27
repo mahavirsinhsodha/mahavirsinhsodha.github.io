@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Smooth Hand Drawing</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: white;
+    }
+    canvas {
+      display: block;
+    }
+    video {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <video id="video" autoplay playsinline></video>
+  <canvas id="canvas"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const videoElement = document.getElementById('video');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    let smoothX = null;
+    let smoothY = null;
+    const smoothing = 0.3;
+
+    const hands = new Hands({
+      locateFile: file => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+    });
+
+    hands.setOptions({
+      maxNumHands: 1,
+      modelComplexity: 1,
+      minDetectionConfidence: 0.8,
+      minTrackingConfidence: 0.6
+    });
+
+    hands.onResults(results => {
+      if (results.multiHandLandmarks.length > 0) {
+        const x = (1 - results.multiHandLandmarks[0][8].x) * canvas.width;
+        const y = results.multiHandLandmarks[0][8].y * canvas.height;
+
+        if (smoothX === null || smoothY === null) {
+          smoothX = x;
+          smoothY = y;
+        } else {
+          smoothX += (x - smoothX) * smoothing;
+          smoothY += (y - smoothY) * smoothing;
+
+          // Draw trail (line from last to current)
+          ctx.beginPath();
+          ctx.arc(smoothX, smoothY, 5, 0, Math.PI * 2);
+          ctx.fillStyle = "blue";
+          ctx.fill();
+        }
+      }
+    });
+
+    const camera = new Camera(videoElement, {
+      onFrame: async () => {
+        await hands.send({ image: videoElement });
+      },
+      width: 640,
+      height: 480
+    });
+
+    camera.start();
+  </script>
+</body>
+</html>
