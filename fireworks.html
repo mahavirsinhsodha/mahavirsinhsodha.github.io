@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enhanced Fireworks Simulator</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Set canvas to full screen
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Particle Class
+    class Particle {
+      constructor(x, y, color, shape) {
+        this.x = x;
+        this.y = y;
+        this.color = color;
+        this.shape = shape;
+        this.radius = Math.random() * 3 + 1;
+        this.speedX = Math.random() * 6 - 3;
+        this.speedY = Math.random() * 6 - 3;
+        this.alpha = 1;
+        this.gravity = 0.05;
+      }
+
+      update() {
+        this.speedY += this.gravity;
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.alpha -= 0.02;
+        if (this.alpha <= 0) this.radius = 0;
+      }
+
+      draw() {
+        ctx.beginPath();
+        if (this.shape === "star") {
+          this.drawStar();
+        } else if (this.shape === "heart") {
+          this.drawHeart();
+        } else {
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        }
+        ctx.fillStyle = `rgba(${this.color.r}, ${this.color.g}, ${this.color.b}, ${this.alpha})`;
+        ctx.fill();
+      }
+
+      drawStar() {
+        const numPoints = 5;
+        const outerRadius = this.radius;
+        const innerRadius = this.radius / 2;
+        ctx.moveTo(this.x, this.y - outerRadius);
+        for (let i = 0; i < numPoints; i++) {
+          let angle = (i * 2 * Math.PI) / numPoints;
+          let xOuter = this.x + Math.cos(angle) * outerRadius;
+          let yOuter = this.y + Math.sin(angle) * outerRadius;
+          angle += Math.PI / numPoints;
+          let xInner = this.x + Math.cos(angle) * innerRadius;
+          let yInner = this.y + Math.sin(angle) * innerRadius;
+          ctx.lineTo(xOuter, yOuter);
+          ctx.lineTo(xInner, yInner);
+        }
+        ctx.closePath();
+      }
+
+      drawHeart() {
+        const size = this.radius * 2;
+        ctx.moveTo(this.x, this.y);
+        ctx.bezierCurveTo(this.x - size, this.y - size, this.x - size, this.y + size, this.x, this.y + size);
+        ctx.bezierCurveTo(this.x + size, this.y + size, this.x + size, this.y - size, this.x, this.y);
+      }
+    }
+
+    // Firework Class
+    class Firework {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.particles = [];
+        this.colors = [
+          {r: 255, g: 0, b: 0},
+          {r: 0, g: 255, b: 0},
+          {r: 0, g: 0, b: 255},
+          {r: 255, g: 255, b: 0},
+          {r: 255, g: 165, b: 0},
+        ];
+        this.shapes = ["circle", "star", "heart"];
+        this.createParticles();
+      }
+
+      createParticles() {
+        const numberOfParticles = 150;
+        const color = this.colors[Math.floor(Math.random() * this.colors.length)];
+        const shape = this.shapes[Math.floor(Math.random() * this.shapes.length)];
+        for (let i = 0; i < numberOfParticles; i++) {
+          this.particles.push(new Particle(this.x, this.y, color, shape));
+        }
+      }
+
+      update() {
+        for (let i = 0; i < this.particles.length; i++) {
+          this.particles[i].update();
+          if (this.particles[i].alpha <= 0) {
+            this.particles.splice(i, 1);
+            i--;
+          }
+        }
+      }
+
+      draw() {
+        for (let i = 0; i < this.particles.length; i++) {
+          this.particles[i].draw();
+        }
+      }
+    }
+
+    const fireworks = [];
+
+    // Mouse & Touch Event
+    function createFirework(event) {
+      fireworks.push(new Firework(event.x, event.y));
+    }
+
+    canvas.addEventListener('click', (event) => createFirework(event));
+    canvas.addEventListener('touchstart', (event) => {
+      event.preventDefault();
+      const touch = event.touches[0];
+      createFirework({x: touch.clientX, y: touch.clientY});
+    });
+
+    // Animation Loop
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = 0; i < fireworks.length; i++) {
+        fireworks[i].update();
+        fireworks[i].draw();
+      }
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+  </script>
+</body>
+</html>

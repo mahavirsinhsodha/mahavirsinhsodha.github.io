@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Currency Converter</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f4e4ba, #ffd6d6);
+    }
+
+    .container {
+      background-color: #fff;
+      padding: 2.5rem;
+      border-radius: 1rem;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      min-height: 45vh;
+      width: 90%;
+      max-width: 450px;
+    }
+
+    .container h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #333;
+    }
+
+    form {
+      margin: 2rem 0 1rem 0;
+    }
+
+    .amount p,
+    .from p,
+    .to p {
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+      color: #444;
+    }
+
+    form input {
+      width: 100%;
+      height: 3rem;
+      border: 1px solid lightgray;
+      border-radius: 0.75rem;
+      font-size: 1rem;
+      padding-left: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .dropdown {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 1.5rem;
+    }
+
+    .dropdown i {
+      font-size: 1.5rem;
+      margin-top: 1.5rem;
+      color: #af4d98;
+    }
+
+    .select-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      border: 1px solid lightgray;
+      width: 8rem;
+    }
+
+    .select-container img {
+      max-width: 2rem;
+    }
+
+    .select-container select {
+      font-size: 1rem;
+      border: none;
+      outline: none;
+      background: none;
+    }
+
+    .msg {
+      margin: 2rem 0;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #444;
+    }
+
+    form button {
+      width: 100%;
+      height: 3rem;
+      background-color: #af4d98;
+      color: #fff;
+      font-size: 1.15rem;
+      border: none;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    form button:hover {
+      background-color: #933c80;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h2>Currency Converter</h2>
+    <form>
+      <div class="amount">
+        <p>Enter Amount</p>
+        <input value="1" type="text" />
+      </div>
+      <div class="dropdown">
+        <div class="from">
+          <p>From</p>
+          <div class="select-container">
+            <img src="https://flagsapi.com/US/flat/64.png" />
+            <select name="from"></select>
+          </div>
+        </div>
+        <i class="fa-solid fa-arrow-right-arrow-left"></i>
+        <div class="to">
+              <p>To</p>
+              <div class="select-container">
+                <img src="https://flagsapi.com/IN/flat/64.png" />
+                <select name="to"></select>
+              </div>
+              
+       <input type="text" readonly />
+            </div>
+      </div>
+
+     
+     
+      <div class="msg">1 USD = 80 INR</div>
+      <button>Get Exchange Rate</button>
+    </form>
+  </div>
+
+  <script>
+    const countryList = {
+      AED: "AE", AFN: "AF", XCD: "AG", ALL: "AL", AMD: "AM", ANG: "AN", AOA: "AO", AQD: "AQ", ARS: "AR", AUD: "AU",
+      AZN: "AZ", BAM: "BA", BBD: "BB", BDT: "BD", XOF: "BE", BGN: "BG", BHD: "BH", BIF: "BI", BMD: "BM", BND: "BN",
+      BOB: "BO", BRL: "BR", BSD: "BS", NOK: "BV", BWP: "BW", BYR: "BY", BZD: "BZ", CAD: "CA", CDF: "CD", XAF: "CF",
+      CHF: "CH", CLP: "CL", CNY: "CN", COP: "CO", CRC: "CR", CUP: "CU", CVE: "CV", CYP: "CY", CZK: "CZ", DJF: "DJ",
+      DKK: "DK", DOP: "DO", DZD: "DZ", ECS: "EC", EEK: "EE", EGP: "EG", ETB: "ET", EUR: "FR", FJD: "FJ", FKP: "FK",
+      GBP: "GB", GEL: "GE", GGP: "GG", GHS: "GH", GIP: "GI", GMD: "GM", GNF: "GN", GTQ: "GT", GYD: "GY", HKD: "HK",
+      HNL: "HN", HRK: "HR", HTG: "HT", HUF: "HU", IDR: "ID", ILS: "IL", INR: "IN", IQD: "IQ", IRR: "IR", ISK: "IS",
+      JMD: "JM", JOD: "JO", JPY: "JP", KES: "KE", KGS: "KG", KHR: "KH", KMF: "KM", KPW: "KP", KRW: "KR", KWD: "KW",
+      KYD: "KY", KZT: "KZ", LAK: "LA", LBP: "LB", LKR: "LK", LRD: "LR", LSL: "LS", LTL: "LT", LVL: "LV", LYD: "LY",
+      MAD: "MA", MDL: "MD", MGA: "MG", MKD: "MK", MMK: "MM", MNT: "MN", MOP: "MO", MRO: "MR", MTL: "MT", MUR: "MU",
+      MVR: "MV", MWK: "MW", MXN: "MX", MYR: "MY", MZN: "MZ", NAD: "NA", XPF: "NC", NGN: "NG", NIO: "NI", NPR: "NP",
+      NZD: "NZ", OMR: "OM", PAB: "PA", PEN: "PE", PGK: "PG", PHP: "PH", PKR: "PK", PLN: "PL", PYG: "PY", QAR: "QA",
+      RON: "RO", RSD: "RS", RUB: "RU", RWF: "RW", SAR: "SA", SBD: "SB", SCR: "SC", SDG: "SD", SEK: "SE", SGD: "SG",
+      SKK: "SK", SLL: "SL", SOS: "SO", SRD: "SR", STD: "ST", SVC: "SV", SYP: "SY", SZL: "SZ", THB: "TH", TJS: "TJ",
+      TMT: "TM", TND: "TN", TOP: "TO", TRY: "TR", TTD: "TT", TWD: "TW", TZS: "TZ", UAH: "UA", UGX: "UG", USD: "US",
+      UYU: "UY", UZS: "UZ", VEF: "VE", VND: "VN", VUV: "VU", YER: "YE", ZAR: "ZA", ZMK: "ZM", ZWD: "ZW"
+    };
+
+    const BASE_URL = "https://api.frankfurter.app/latest";
+    const dropdowns = document.querySelectorAll(".dropdown select");
+    const btn = document.querySelector("form button");
+    const fromCurr = document.querySelector(".from select");
+    const toCurr = document.querySelector(".to select");
+    const msg = document.querySelector(".msg");
+    const fromAmt = document.querySelector(".amount input");
+
+    const toAmt = document.querySelector(".to input");
+
+
+    for (let select of dropdowns) {
+      for (currCode in countryList) {
+        let newOption = document.createElement("option");
+        newOption.innerText = currCode;
+        newOption.value = currCode;
+        if (select.name === "from" && currCode === "USD") {
+          newOption.selected = "selected";
+        } else if (select.name === "to" && currCode === "INR") {
+          newOption.selected = "selected";
+        }
+        select.append(newOption);
+      }
+
+      select.addEventListener("change", (evt) => {
+        updateFlag(evt.target);
+      });
+    }
+
+    async function updateExchangeRate() {
+    const fromCurrency = fromCurr.value;
+    const toCurrency = toCurr.value;
+
+    const URL = `${BASE_URL}?from=${fromCurrency}&to=${toCurrency}`;
+
+    try {
+        const response = await fetch(URL);
+        const data = await response.json();
+        const rate = data.rates[toCurrency];
+
+        let converted = (fromAmt.value * rate).toFixed(2);
+        toAmt.value = converted;
+        msg.innerText = `1 ${fromCurrency} = ${rate} ${toCurrency}`;
+    } catch (err) {
+        msg.innerText = "Exchange rate fetch failed.";
+        console.error(err);
+    }
+}
+
+
+    const updateFlag = (element) => {
+      let currCode = element.value;
+      let countryCode = countryList[currCode];
+      let newSrc = `https://flagsapi.com/${countryCode}/flat/64.png`;
+      let img = element.parentElement.querySelector("img");
+      img.src = newSrc;
+    };
+
+    btn.addEventListener("click", (evt) => {
+      evt.preventDefault();
+      updateExchangeRate();
+    });
+
+    window.addEventListener("load", () => {
+      updateExchangeRate();
+    });
+  </script>
+</body>
+</html>
