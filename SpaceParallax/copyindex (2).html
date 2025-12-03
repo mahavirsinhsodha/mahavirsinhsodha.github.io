@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Journey: From Galaxy to Earth</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            overflow-x: hidden;
+            color: white;
+            background-color: #000;
+        }
+
+        .container {
+            perspective: 1px;
+            height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .parallax-section {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform-style: preserve-3d;
+        }
+
+        .parallax-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            transform: translateZ(-1px) scale(2);
+            z-index: -1;
+        }
+
+        .content {
+            max-width: 800px;
+            padding: 20px;
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            transform: translateZ(0);
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+        }
+
+        .scroll-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 100;
+        }
+
+        .scroll-indicator p {
+            margin-bottom: 10px;
+        }
+
+        .arrow {
+            width: 30px;
+            height: 30px;
+            border-right: 3px solid white;
+            border-bottom: 3px solid white;
+            transform: rotate(45deg);
+            margin: 0 auto;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: rotate(45deg) translateY(0);
+            }
+            40% {
+                transform: rotate(45deg) translateY(-10px);
+            }
+            60% {
+                transform: rotate(45deg) translateY(-5px);
+            }
+        }
+
+        /* Specific section styles */
+        #milky-way .parallax-bg {
+            background-image: radial-gradient(circle, #1a1a2e 0%, #16213e 30%, #0f3460 60%, #000 100%);
+            background-image: url('https://images.unsplash.com/photo-1465101162946-4377e57745c3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+        }
+
+        #solar-system .parallax-bg {
+            background-image: radial-gradient(circle, #000 0%, #0a0a2a 50%, #000 100%);
+        }
+
+        #earth-view .parallax-bg {
+            background-image: url('https://t4.ftcdn.net/jpg/02/72/80/65/240_F_272806553_zZJc0eR1MHW6OlE94iLw7UHwD0QGqN8g.jpg');
+        }
+
+        #mountains .parallax-bg {
+            background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+        }
+
+        #rivers .parallax-bg {
+            background-image: url('https://images.unsplash.com/photo-1439066615861-d1af74d74000?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+        }
+
+        #forest .parallax-bg {
+            background-image: url('https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+        }
+
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .sun {
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #ffde00 0%, #ff8c00 70%, #ff4500 100%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            border-radius: 100%;
+        }
+
+        .mercury {
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(45deg, #a9a9a9, #696969);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) translateX(120px);
+            animation: orbit 5s linear infinite;
+        }
+
+        .venus {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(45deg, #e6b87e, #d2691e);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) translateX(180px);
+            animation: orbit 8s linear infinite;
+        }
+
+        .earth-planet {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #1e90ff, #228b22);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) translateX(250px);
+            animation: orbit 12s linear infinite;
+        }
+
+        .mars {
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(45deg, #ff4500, #8b4513);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) translateX(320px);
+            animation: orbit 15s linear infinite;
+        }
+
+        @keyframes orbit {
+            from {
+                transform: translate(-50%, -50%) rotate(0deg) translateX(var(--orbit-radius)) rotate(0deg);
+            }
+            to {
+                transform: translate(-50%, -50%) rotate(360deg) translateX(var(--orbit-radius)) rotate(-360deg);
+            }
+        }
+
+        .mercury { --orbit-radius: 120px; }
+        .venus { --orbit-radius: 180px; }
+        .earth-planet { --orbit-radius: 250px; }
+        .mars { --orbit-radius: 320px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <section id="milky-way" class="parallax-section">
+            <div class="parallax-bg"></div>
+            <div class="content">
+                <h1>The Milky Way Galaxy</h1>
+                <p>Our cosmic home, a vast spiral galaxy containing billions of stars, planets, and celestial wonders.</p>
+            </div>
+        </section>
+
+        <section id="solar-system" class="parallax-section">
+            <div class="parallax-bg"></div>
+            <div class="sun"></div>
+            <div class="planet mercury"></div>
+            <div class="planet venus"></div>
+            <div class="planet earth-planet"></div>
+            <div class="planet mars"></div>
+            <div class="content">
+                <h1>Our Solar System</h1>
+                <p>A family of planets orbiting our life-giving star, the Sun. Among them, our home planet Earth.</p>
+            </div>
+        </section>
+
+        <section id="earth-view" class="parallax-section">
+            <div class="parallax-bg"></div>
+            <div class="content">
+                <h1>Planet Earth</h1>
+                <p>The blue marble, our oasis in space with vast oceans, continents, and a life-sustaining atmosphere.</p>
+            </div>
+        </section>
+
+        <section id="mountains" class="parallax-section">
+            <div class="parallax-bg"></div>
+            <div class="content">
+                <h1>Majestic Mountains</h1>
+                <p>Earth's towering peaks, shaped over millennia by tectonic forces, standing as sentinels of time.</p>
+            </div>
+        </section>
+
+        <section id="rivers" class="parallax-section">
+            <div class="parallax-bg"></div>
+            <div class="content">
+                <h1>Flowing Rivers</h1>
+                <p>Life-giving waterways that carve through landscapes, connecting ecosystems and human civilizations.</p>
+            </div>
+        </section>
+
+        <section id="forest" class="parallax-section">
+            <div class="parallax-bg"></div>
+            <div class="content">
+                <h1>Verdant Forests</h1>
+                <p>Lush ecosystems teeming with biodiversity, the lungs of our planet and guardians of ecological balance.</p>
+            </div>
+        </section>
+
+        <div class="scroll-indicator">
+            <p>Scroll to continue your journey</p>
+            <div class="arrow"></div>
+        </div>
+    </div>
+
+    <script>
+        // Simple parallax effect
+        document.addEventListener('scroll', function() {
+            const scrolled = window.pageYOffset;
+            const parallaxSections = document.querySelectorAll('.parallax-section');
+            
+           
+        });
+
+        // Smooth scrolling for better user experience
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

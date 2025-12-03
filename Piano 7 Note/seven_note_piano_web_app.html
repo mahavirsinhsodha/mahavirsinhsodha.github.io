@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Seven-Note Piano — Sa Re Ga Ma Pa Dha Ni Sa</title>
+  <style>
+    :root{
+      --key-w: 12vw;
+      --key-h: 280px;
+      --accent:#222;
+      --bg: #0f1724;
+      --card: #0b1220;
+      --white:#f7f7f7;
+      --shadow-color: rgba(0,0,0,0.5);
+    }
+    *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif}
+    body{background:linear-gradient(180deg,#071024 0%, #081627 100%);color:var(--white);display:flex;align-items:center;justify-content:center;height:100vh;margin:0;padding:15px;transition: background 0.3s ease}
+    .app{width:95%;max-width:950px;background:rgba(255,255,255,0.05);border-radius:20px;padding:20px;box-shadow:0 12px 35px var(--shadow-color);transition: transform 0.3s ease}
+    .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px}
+    h1{font-size:20px;margin:0;text-align:center;flex:1}
+    .controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .controls label{font-size:13px;color:#cbd5e1}
+    .row{display:flex;gap:12px}
+    .piano{display:flex;align-items:flex-end;gap:6px;padding:12px 6px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border-radius:12px;transition: all 0.3s ease;flex-wrap:wrap;justify-content:center}
+    .key{width:calc((100% - 6*6px)/7);min-width:50px;height:var(--key-h);background:var(--white);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;position:relative;cursor:pointer;user-select:none;box-shadow:0 6px 18px var(--shadow-color);transition: transform 0.1s ease, box-shadow 0.1s ease}
+    .key:active,.key.active{transform:translateY(6px) scale(0.98);box-shadow:0 4px 12px var(--shadow-color)}
+    .label{background:transparent;color:#0b1220;font-weight:700;padding:6px 12px;border-radius:8px;margin-bottom:14px;font-size:14px}
+    .sub{font-size:13px;color:#94a3b8;margin-bottom:8px}
+    .meta{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    input[type=range]{-webkit-appearance:none;height:6px;background:#102131;border-radius:8px;outline:none;transition: background 0.3s ease}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#0ea5a4;cursor:pointer;transition: transform 0.2s ease}
+    input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+    .kbd-hint{font-size:12px;color:#94a3b8}
+    footer{margin-top:16px;font-size:12px;color:#94a3b8;text-align:center}
+    .small{font-size:13px;color:#cbd5e1}
+    .button{background:#0ea5a4;padding:6px 12px;border-radius:10px;color:#052023;font-weight:700;border:none;cursor:pointer;transition: transform 0.2s ease, box-shadow 0.2s ease}
+    .button:hover{transform:scale(1.05);box-shadow:0 4px 15px var(--shadow-color)}
+    @media (max-width:720px){:root{--key-h:180px}}
+    @media (max-width:480px){.key{width:calc((100% - 6*4px)/7);min-width:35px}} 
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="top">
+      <h1>Seven-Note Piano — Sa Re Ga Ma Pa Dha Ni Sa</h1>
+      <div class="controls">
+        <label class="small">Octave
+          <select id="octave">
+            <option value="3">3</option>
+            <option value="4" selected>4</option>
+            <option value="5">5</option>
+          </select>
+        </label>
+        <label class="small">Volume
+          <input id="volume" type="range" min="0" max="1" step="0.01" value="0.7" />
+        </label>
+        <label class="small">Sustain <input type="checkbox" id="sustain" /></label>
+        <button id="randomize" class="button">Randomise</button>
+      </div>
+    </div>
+
+    <div class="piano" id="piano">
+      <div class="key" data-i="0" tabindex="0"><div class="sub">Sa</div><div class="label">C</div></div>
+      <div class="key" data-i="1" tabindex="0"><div class="sub">Re</div><div class="label">D</div></div>
+      <div class="key" data-i="2" tabindex="0"><div class="sub">Ga</div><div class="label">E</div></div>
+      <div class="key" data-i="3" tabindex="0"><div class="sub">Ma</div><div class="label">F</div></div>
+      <div class="key" data-i="4" tabindex="0"><div class="sub">Pa</div><div class="label">G</div></div>
+      <div class="key" data-i="5" tabindex="0"><div class="sub">Dha</div><div class="label">A</div></div>
+      <div class="key" data-i="6" tabindex="0"><div class="sub">Ni</div><div class="label">B</div></div>
+    </div>
+
+    <div class="row" style="margin-top:16px;align-items:center;justify-content:space-between">
+      <div class="meta">
+        <div class="kbd-hint">Keyboard: A S D F G H J — play Sa..Ni</div>
+        <div class="small">Click / touch keys or use keyboard</div>
+      </div>
+      <div class="meta"><div class="small">Envelope: gentle attack & release</div></div>
+    </div>
+
+    <footer>  &copy; 2025 MS Corporation — All Rights Reserved.</footer>
+  </main>
+
+  <script>
+    const baseFreqs = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88];
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const keys = Array.from(document.querySelectorAll('.key'));
+    const octaveSelect = document.getElementById('octave');
+    const volumeSlider = document.getElementById('volume');
+    const sustainCheckbox = document.getElementById('sustain');
+    const randomBtn = document.getElementById('randomize');
+
+    let masterGain = audioCtx.createGain();
+    masterGain.gain.value = Number(volumeSlider.value);
+    masterGain.connect(audioCtx.destination);
+
+    volumeSlider.addEventListener('input', ()=>{ masterGain.gain.value = Number(volumeSlider.value); });
+
+    function playNote(i, {sustain=false, octave=4}={}){
+      const osc = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator(); // for richer tone
+      const g = audioCtx.createGain();
+      const now = audioCtx.currentTime;
+      const freq = baseFreqs[i] * Math.pow(2, octave-4);
+
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      osc2.type = 'triangle';
+      osc2.frequency.value = freq * 2; // harmonic
+
+      g.gain.setValueAtTime(0.0001, now);
+      const attack = 0.006, release = sustain ? 1.2 : 0.25;
+      g.gain.exponentialRampToValueAtTime(sustain ? 0.85 : 0.6, now+attack);
+
+      osc.connect(g);
+      osc2.connect(g);
+      g.connect(masterGain);
+
+      osc.start(now); osc2.start(now);
+      return {osc, osc2, g, release, started: now};
+    }
+
+    const active = new Map();
+
+    function noteOn(i, el){
+      if (audioCtx.state==='suspended') audioCtx.resume();
+      const octave = Number(octaveSelect.value);
+      const sustain = sustainCheckbox.checked;
+      const node = playNote(i,{sustain,octave});
+      active.set(i,node); el.classList.add('active');
+    }
+
+    function noteOff(i, el){
+      const node = active.get(i); if(!node) return;
+      const now = audioCtx.currentTime;
+      node.g.gain.cancelScheduledValues(now);
+      node.g.gain.setValueAtTime(node.g.gain.value, now);
+      node.g.gain.exponentialRampToValueAtTime(0.0001, now+node.release);
+      node.osc.stop(now+node.release+0.05); node.osc2.stop(now+node.release+0.05);
+      active.delete(i); el.classList.remove('active');
+    }
+
+    keys.forEach(k=>{
+      const i=Number(k.dataset.i);
+      k.addEventListener('mousedown',()=>noteOn(i,k));
+      k.addEventListener('mouseup',()=>{if(!sustainCheckbox.checked)noteOff(i,k)});
+      k.addEventListener('mouseleave',()=>{if(!sustainCheckbox.checked)noteOff(i,k)});
+      k.addEventListener('touchstart', e=>{e.preventDefault();noteOn(i,k)});
+      k.addEventListener('touchend', e=>{e.preventDefault();if(!sustainCheckbox.checked)noteOff(i,k)});
+      k.addEventListener('keydown', e=>{if(e.key===' '||e.key==='Enter'){noteOn(i,k);setTimeout(()=>{if(!sustainCheckbox.checked)noteOff(i,k)},220);e.preventDefault();}});
+    });
+
+    const keyMap={a:0,s:1,d:2,f:3,g:4,h:5,j:6};
+    window.addEventListener('keydown', e=>{const k=e.key.toLowerCase();if(keyMap[k]!==undefined){const i=keyMap[k];if(!active.has(i))noteOn(i,keys[i]);}});
+    window.addEventListener('keyup', e=>{const k=e.key.toLowerCase();if(keyMap[k]!==undefined){const i=keyMap[k];if(!sustainCheckbox.checked)noteOff(i,keys[i]);}});
+
+    randomBtn.addEventListener('click',()=>{let t=0;for(let i=0;i<8;i++){const n=Math.floor(Math.random()*7);setTimeout(()=>noteOn(n,keys[n]),t);setTimeout(()=>{if(!sustainCheckbox.checked)noteOff(n,keys[n])},t+260);t+=280;}});
+
+    sustainCheckbox.addEventListener('change',()=>{if(!sustainCheckbox.checked){for(const [i] of active.entries())noteOff(i,keys[i]);}});
+  </script>
+</body>
+</html>

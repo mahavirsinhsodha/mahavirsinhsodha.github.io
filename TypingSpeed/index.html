@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Typing Speed Test - MS
+</title>
+<style>
+  :root{
+    --bg: #f8f9fa; --card: #ffffff; --muted: #6c757d; --accent: #4dabf7; --success: #51cf66; --danger: #ff6b6b; 
+    --glass: rgba(0,0,0,0.04); --text: #212529; --border: rgba(0,0,0,0.08);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial; background:linear-gradient(180deg,#f1f3f5 0%, #e9ecef 100%); color:var(--text); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale}
+  .wrap{max-width:980px;margin:28px auto;padding:20px}
+  header{display:flex;gap:16px;align-items:center;justify-content:space-between}
+  .title{display:flex;gap:12px;align-items:center}
+  .logo{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#74c0fc);display:flex;align-items:center;justify-content:center;font-weight:700;color:white}
+  h1{font-size:18px;margin:0}
+  p.lead{margin:0;color:var(--muted);font-size:13px}
+
+  .card{background:var(--card); border-radius:14px; padding:16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-top:18px; border: 1px solid var(--border)}
+
+  .controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  select, button, .seg{background:var(--glass);border:1px solid var(--border);color:var(--muted);padding:8px 10px;border-radius:10px}
+  button.primary{background:linear-gradient(90deg,var(--accent),#74c0fc);color:white;border:none;font-weight:600}
+  button.ghost{background:transparent;border:1px solid var(--border)}
+
+  .main{display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:16px}
+  @media(max-width:900px){ .main{grid-template-columns:1fr} }
+
+  .prompt{
+  font-size:18px;
+  line-height:1.5;
+  padding:14px;
+  border-radius:10px;
+  background:rgba(0,0,0,0.02);
+  min-height:120px;
+  word-wrap: break-word;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+   .char{
+  padding:0 1px;
+  border-radius:3px;
+  display: inline; /* Ensure they stay inline but can break */
+}
+  .char.correct{background:transparent;color:var(--success)}
+  .char.incorrect{background:rgba(255,100,100,0.08);color:var(--danger);text-decoration:underline}
+  .char.next{border-left:2px solid var(--accent);}
+
+  textarea.input{width:100%;height:140px;padding:12px;border-radius:10px;border:1px solid var(--border);resize:none;background:var(--card);color:var(--text);font-size:16px}
+
+  .stats{display:flex;gap:12px;flex-wrap:wrap}
+  .stat{flex:1;min-width:120px;background:rgba(0,0,0,0.02);padding:12px;border-radius:10px}
+  .stat h3{margin:0;font-size:12px;color:var(--muted)}
+  .stat p{margin:6px 0 0;font-size:20px;font-weight:700}
+
+  .graph-wrap{height:150px;background:rgba(0,0,0,0.015);border-radius:10px;padding:10px}
+  canvas{width:100%;height:100%;display:block}
+
+  .footer{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:14px}
+  .progress{height:10px;background:rgba(0,0,0,0.04);border-radius:999px;overflow:hidden}
+  .bar{height:100%;background:linear-gradient(90deg,var(--accent),#74c0fc);width:0%}
+
+  /* animated confetti-like dots (subtle) */
+  .spark{position:absolute;pointer-events:none;mix-blend-mode:screen;opacity:0.12}
+
+  small.note{color:var(--muted)}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <div class="logo">MS</div>
+        <div>
+          <h1>Typing Speed Test</h1>
+          <p class="lead">Live WPM, countdown timer, accuracy, mistakes highlighting & animated graph — responsive single file.</p>
+        </div>
+      </div>
+      <div class="controls">
+        <label for="duration">Time</label>
+        <select id="duration">
+          <option value="15">15 sec</option>
+          <option value="30" selected>30 sec</option>
+          <option value="60">60 sec</option>
+          <option value="120">2 min</option>
+        </select>
+        <label for="samples">Sample</label>
+        <select id="samples"></select>
+        <button id="startBtn" class="primary">Start</button>
+        <button id="restartBtn" class="ghost">Restart</button>
+      </div>
+    </header>
+
+    <div class="card main">
+      <div>
+        <div class="prompt card-inner" id="prompt" aria-live="polite"></div>
+
+        <div style="margin-top:12px">
+          <textarea id="input" class="input" placeholder="Type here..." disabled></textarea>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:10px;align-items:center;justify-content:space-between">
+          <div class="progress" style="flex:1;margin-right:12px"><div class="bar" id="bar"></div></div>
+          <div style="width:120px;text-align:right"><small class="note">Time left</small><div id="timeLeft" style="font-weight:700">0s</div></div>
+        </div>
+      </div>
+
+      <aside>
+        <div class="stats">
+          <div class="stat"><h3>WPM (live)</h3><p id="wpm">0</p></div>
+          <div class="stat"><h3>Accuracy</h3><p id="acc">100%</p></div>
+          <div class="stat"><h3>Characters</h3><p id="chars">0 / 0</p></div>
+        </div>
+
+        <div style="height:12px"></div>
+        <div class="card graph-wrap"><canvas id="graph"></canvas></div>
+
+        <div class="footer">
+          <small class="note">Press <kbd>Esc</kbd> to reset input</small>
+          <div style="display:flex;gap:8px">
+            <button id="copyBtn" class="ghost">Copy Result</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+<footer style="text-align: center; padding: 10px; color: BLACK; margin-top: 20px; font-size:11px; ">
+    
+        <strong>&copy; 2025 MS Corporation — All Rights Reserved.</strong>
+    </footer>
+<script>
+// --- Samples ---
+const SAMPLES = [
+  "The quick brown fox jumps over the lazy dog.",
+  "Typing well is about rhythm, accuracy and focused practice. Keep your fingers relaxed and eyes on the target.",
+  "JavaScript powers interactive websites. Practice by building small apps — you'll learn faster than reading alone.",
+  "Build projects, not just tutorials. Projects teach problem solving, edge cases, and real UX considerations.",
+  "Consistency beats intensity. A little practice every day compounds into big improvements over months.",
+  "Programming is not about typing, it's about thinking. But typing faster helps you think faster and iterate quicker.",
+  "The best way to learn a new programming language is by writing programs in it. Start with simple exercises and gradually increase complexity.",
+  "Clean code is not written by following rules. You learn clean code by writing lots of code and noticing what makes it hard to work with.",
+  "Debugging is like being a detective in a crime movie where you are also the murderer. You have to find the bug you created.",
+  "There are only two hard things in computer science: cache invalidation, naming things, and off-by-one errors.",
+  "The most important skill for a programmer is the ability to effectively communicate ideas to both humans and computers.",
+  "Don't repeat yourself is a principle aimed at reducing repetition of software patterns. It's a fundamental concept in software engineering.",
+  "Algorithms are like recipes: they must be precise, unambiguous, and produce the same result every time when given the same inputs.",
+  "The internet is becoming the town square for the global village of tomorrow. It connects people across continents in real time.",
+  "Machine learning is transforming industries by enabling computers to learn from data and make predictions without explicit programming.",
+  "Open source software is developed in a collaborative public manner. Anyone can inspect, modify, and enhance the source code.",
+  "User experience design encompasses all aspects of the end-user's interaction with a company, its services, and its products.",
+  "Cloud computing allows businesses to access computing resources on demand without direct active management by the user."
+];
+
+// DOM
+const promptEl = document.getElementById('prompt');
+const inputEl = document.getElementById('input');
+const wpmEl = document.getElementById('wpm');
+const accEl = document.getElementById('acc');
+const charsEl = document.getElementById('chars');
+const timeLeftEl = document.getElementById('timeLeft');
+const startBtn = document.getElementById('startBtn');
+const restartBtn = document.getElementById('restartBtn');
+const durationSel = document.getElementById('duration');
+const samplesSel = document.getElementById('samples');
+const barEl = document.getElementById('bar');
+const copyBtn = document.getElementById('copyBtn');
+
+// fill samples select
+SAMPLES.forEach((s,i)=>{const o=document.createElement('option');o.value=i;o.textContent=(i+1)+'. '+s.slice(0,60)+(s.length>60?'...':'');samplesSel.appendChild(o)});
+
+let state = {
+  running:false,
+  startTime:0,
+  duration:30,
+  sample:'',
+  typed:'',
+  timerInterval:null,
+  graphData:[],
+};
+
+function setSample(idx){ state.sample = SAMPLES[idx||0]; renderPrompt(); }
+
+function renderPrompt(){
+  const text = state.sample || '';
+  // build spans char-by-char with classes for highlighting
+  const typed = state.typed || '';
+  let html='';
+  for(let i=0;i<text.length;i++){
+    const ch = text[i] === ' ' ? '\u00A0' : text[i];
+    let cls='char';
+    if(i < typed.length){ cls += (typed[i] === text[i]) ? ' correct' : ' incorrect'; }
+    if(i === typed.length) cls += ' next';
+    html += `<span class="${cls}">${escapeHtml(ch)}</span>`;
+  }
+  promptEl.innerHTML = html;
+}
+
+function escapeHtml(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function reset(keepSample=false){
+  clearInterval(state.timerInterval);
+  state.running=false; state.startTime=0; state.typed=''; state.graphData=[];
+  wpmEl.textContent='0'; accEl.textContent='100%'; charsEl.textContent='0 / '+(state.sample.length||0);
+  timeLeftEl.textContent = durationSel.value + 's'; barEl.style.width='0%'; inputEl.value=''; inputEl.disabled=true;
+  renderPrompt();
+}
+
+function start(){
+  if(state.running) return;
+  state.duration = Number(durationSel.value);
+  state.startTime = Date.now();
+  state.running = true;
+  inputEl.disabled = false; inputEl.focus();
+  state.graphData = [];
+
+  state.timerInterval = setInterval(()=>{
+    const elapsed = (Date.now() - state.startTime)/1000;
+    const left = Math.max(0, state.duration - elapsed);
+    timeLeftEl.textContent = Math.ceil(left) + 's';
+    barEl.style.width = Math.max(0, (elapsed/state.duration)*100) + '%';
+    computeLiveStats();
+    // record wpm sample for graph every 200ms
+    if(state.running){ state.graphData.push({t:elapsed, w:currentWPM()}); drawGraph(); }
+    if(left <= 0){ finish(); }
+  }, 200);
+}
+
+function finish(){
+  clearInterval(state.timerInterval);
+  state.running=false; inputEl.disabled=true;
+  computeLiveStats(true);
+  // final draw
+  drawGraph(true);
+}
+
+function computeLiveStats(final=false){
+  const typed = state.typed;
+  const sample = state.sample;
+  const typedLen = typed.length;
+  let correctChars=0;
+  for(let i=0;i<typed.length && i<sample.length;i++){ if(typed[i]===sample[i]) correctChars++; }
+  const accuracy = typedLen === 0 ? 100 : Math.max(0, Math.round((correctChars/typedLen)*100));
+  accEl.textContent = accuracy + '%';
+  charsEl.textContent = typedLen + ' / ' + sample.length;
+
+  const wpm = currentWPM();
+  wpmEl.textContent = Math.max(0, Math.round(wpm));
+
+  // subtle final animation when finished
+  if(final){
+    wpmEl.textContent = Math.round(wpm) + '\n';
+  }
+}
+
+function currentWPM(){
+  const elapsedSecs = Math.max(0.001,(Date.now() - state.startTime)/1000);
+  // count correct chars
+  const sample = state.sample;
+  let correctChars=0;
+  for(let i=0;i<state.typed.length && i<sample.length;i++){ if(state.typed[i]===sample[i]) correctChars++; }
+  const words = correctChars/5;
+  const minutes = elapsedSecs/60;
+  return words/(minutes||(1/60));
+}
+
+// input handling
+inputEl.addEventListener('input', (e)=>{
+  state.typed = e.target.value;
+  renderPrompt();
+  computeLiveStats();
+});
+
+// keyboard shortcuts
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape'){
+    inputEl.value=''; state.typed=''; renderPrompt(); computeLiveStats();
+  }
+});
+
+startBtn.addEventListener('click', ()=>{ if(!state.sample) setSample(0); reset(false); start(); });
+restartBtn.addEventListener('click', ()=>{ reset(); });
+
+durationSel.addEventListener('change', ()=>{ timeLeftEl.textContent = durationSel.value + 's'; });
+samplesSel.addEventListener('change', ()=>{ setSample(Number(samplesSel.value)); reset(); });
+copyBtn.addEventListener('click', ()=>{
+  const text = `WPM: ${wpmEl.textContent} | Acc: ${accEl.textContent} | ${charsEl.textContent}`;
+  navigator.clipboard?.writeText(text).then(()=>{ copyBtn.textContent='Copied'; setTimeout(()=>copyBtn.textContent='Copy Result',1200); });
+});
+
+// --- Graph (canvas) ---
+const canvas = document.getElementById('graph');
+const ctx = canvas.getContext('2d');
+function resizeCanvas(){ canvas.width = canvas.clientWidth * devicePixelRatio; canvas.height = canvas.clientHeight * devicePixelRatio; drawGraph(); }
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function drawGraph(final=false){
+  const d = state.graphData.slice(-200); // keep recent
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  const w = canvas.width, h = canvas.height;
+  // background grid
+  ctx.save(); ctx.scale(devicePixelRatio, devicePixelRatio);
+  ctx.globalAlpha=0.06; ctx.fillStyle='#000000';
+  for(let i=0;i<4;i++){ ctx.fillRect(0, (h/devicePixelRatio)/4*i, (w/devicePixelRatio), 1); }
+  ctx.restore();
+
+  if(d.length===0) return;
+  // normalize times
+  const maxT = d[d.length-1].t;
+  const minT = d[0].t;
+  const span = Math.max(1, maxT-minT);
+  const maxW = Math.max(30, ...d.map(p=>p.w));
+
+  ctx.save(); ctx.scale(devicePixelRatio, devicePixelRatio);
+
+  // draw area
+  ctx.beginPath();
+  for(let i=0;i<d.length;i++){
+    const x = ((d[i].t - minT)/span) * (canvas.clientWidth - 12) + 6;
+    const y = (canvas.clientHeight - 10) - (d[i].w / maxW) * (canvas.clientHeight - 20);
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.strokeStyle = 'rgba(77,171,247,0.95)'; ctx.lineWidth=2; ctx.stroke();
+
+  // gradient fill
+  const grad = ctx.createLinearGradient(0,0,0,canvas.clientHeight);
+  grad.addColorStop(0,'rgba(77,171,247,0.14)'); grad.addColorStop(1,'rgba(77,171,247,0.02)');
+  ctx.lineTo(canvas.clientWidth-6, canvas.clientHeight-6);
+  ctx.lineTo(6, canvas.clientHeight-6);
+  ctx.closePath();
+  ctx.fillStyle = grad; ctx.fill();
+
+  // draw latest dot
+  const last = d[d.length-1];
+  const lx = ((last.t - minT)/span) * (canvas.clientWidth - 12) + 6;
+  const ly = (canvas.clientHeight - 10) - (last.w / maxW) * (canvas.clientHeight - 20);
+  ctx.beginPath(); ctx.arc(lx, ly, 4, 0, Math.PI*2); ctx.fillStyle='rgba(116,192,252,0.95)'; ctx.fill();
+  ctx.restore();
+}
+
+// helpers
+function setInitial(){ setSample(0); reset(); }
+setInitial();
+
+// responsive touch: focus on tap of prompt
+promptEl.addEventListener('click', ()=>{ if(!state.running) start(); else inputEl.focus(); });
+
+</script>
+</body>
+</html>

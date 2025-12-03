@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Task & Habit Manager</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root{--muted:#6b7280}
+    .card{transition:transform .14s ease,box-shadow .14s ease}
+    .card:hover{transform:translateY(-6px);box-shadow:0 12px 30px rgba(2,6,23,.08)}
+    .strike{ text-decoration:line-through; opacity:.6 }
+    .badge{font-weight:600;font-size:.72rem;padding:.18rem .45rem;border-radius:999px}
+    .priority-1{background:linear-gradient(90deg,#ff7a7a,#ffbaba);color:#7a0505}
+    .priority-2{background:linear-gradient(90deg,#ffd77a,#fff0c2);color:#5c3a00}
+    .priority-3{background:linear-gradient(90deg,#9ff78b,#dfffd8);color:#0b5f07}
+    .small-square{width:25px;height:10px;border-radius:3px}
+    @media (max-width:1024px){ .lg\\:col-span-2 { grid-column: span 2 / span 2; } }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased">
+  <div class="max-w-6xl mx-auto p-6">
+
+    <header class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-extrabold">✨ Task & Habit Tracker</h1>
+        <p class="text-sm text-slate-500">Saved in your browser only — private to your device</p>
+      </div>
+      <div class="text-right">
+        <div class="text-xs text-slate-500">Today</div>
+        <div id="todayLabel" class="text-lg font-medium"></div>
+      </div>
+    </header>
+
+    <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- Left: Tasks -->
+      <section class="lg:col-span-2 space-y-4">
+
+        <div class="card bg-white p-4 rounded-lg shadow-sm">
+          <form id="taskForm" class="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+            <div class="md:col-span-2">
+              <label class="text-xs text-slate-600">Task</label>
+              <input name="title" id="taskTitle" required class="w-full mt-1 p-2 rounded border border-slate-200 focus:ring-2 focus:ring-indigo-300" placeholder="e.g. Finish report" />
+            </div>
+            <div>
+              <label class="text-xs text-slate-600">Due</label>
+              <input name="due" id="taskDue" type="date" class="w-full mt-1 p-2 rounded border border-slate-200" />
+            </div>
+            <div>
+              <label class="text-xs text-slate-600">Priority</label>
+              <select id="taskPriority" name="priority" class="w-full mt-1 p-2 rounded border border-slate-200">
+                <option value="1">High</option>
+                <option value="2" selected>Normal</option>
+                <option value="3">Low</option>
+              </select>
+            </div>
+
+            <div class="md:col-span-4">
+              <label class="text-xs text-slate-600">Description (optional)</label>
+              <textarea id="taskDesc" name="desc" rows="2" class="w-full mt-1 p-2 rounded border border-slate-200"></textarea>
+            </div>
+
+            <div class="md:col-span-4 flex gap-2">
+              <button type="submit" class="ml-auto bg-indigo-600 text-white px-4 py-2 rounded shadow hover:bg-indigo-700 transition">Add Task</button>
+              <button type="button" id="clearTaskForm" class="px-3 py-2 border rounded text-slate-600">Clear</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Filters -->
+        <div class="flex flex-wrap gap-2 items-center">
+          <div class="text-sm text-slate-600">Filter:</div>
+          <button class="filterBtn px-3 py-1 rounded bg-white border" data-filter="all">All</button>
+          <button class="filterBtn px-3 py-1 rounded bg-white border" data-filter="today">Today</button>
+          <button class="filterBtn px-3 py-1 rounded bg-white border" data-filter="upcoming">Upcoming</button>
+          <button class="filterBtn px-3 py-1 rounded bg-white border" data-filter="completed">Completed</button>
+          <input id="searchInput" placeholder="Search tasks..." class="ml-auto p-2 rounded border border-slate-200 text-sm" />
+        </div>
+
+        <div id="tasksList" class="space-y-3"></div>
+
+      </section>
+
+      <!-- Right: Habits -->
+      <aside class="space-y-4">
+
+        <div class="card bg-white p-4 rounded-lg">
+          <h2 class="font-semibold">Habits</h2>
+          <form id="habitForm" class="mt-3 flex gap-2">
+            <input id="habitName" name="name" required placeholder="e.g. Read 30 mins" class="flex-1 p-2 rounded border border-slate-200" />
+            <button class="bg-emerald-600 text-white px-3 py-2 rounded">Add</button>
+          </form>
+
+          <div id="habitsList" class="mt-4 space-y-3 text-sm"></div>
+        </div>
+
+        <div class="card bg-white p-4 rounded-lg">
+          <h3 class="font-semibold">Last 30 days</h3>
+          <div class="text-xs text-slate-500 mt-2">Green = done</div>
+          <div id="habitGrid" class="mt-3 space-y-3 text-xs"></div>
+        </div>
+
+        <div class="card bg-white p-4 rounded-lg text-sm text-slate-500">
+          Data is saved only in your browser (localStorage). You can export/import using the buttons below.
+          <div class="mt-3 flex gap-2">
+            <button id="exportBtn" class="px-3 py-2 border rounded">Export JSON</button>
+            <button id="importBtn" class="px-3 py-2 border rounded">Import JSON</button>
+            <input id="importFile" type="file" accept="application/json" class="hidden" />
+          </div>
+        </div>
+
+      </aside>
+    </main>
+
+    <!-- Edit Modal -->
+    <div id="modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center p-4">
+      <div class="bg-white rounded-lg max-w-2xl w-full p-6">
+        <h3 class="font-semibold mb-3">Edit Task</h3>
+        <form id="editForm" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <input type="hidden" name="id" />
+          <div class="md:col-span-2">
+            <label class="text-xs text-slate-600">Task</label>
+            <input name="title" required class="w-full mt-1 p-2 rounded border border-slate-200" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-600">Due</label>
+            <input name="due" type="date" class="w-full mt-1 p-2 rounded border border-slate-200" />
+          </div>
+          <div>
+            <label class="text-xs text-slate-600">Priority</label>
+            <select name="priority" class="w-full mt-1 p-2 rounded border border-slate-200">
+              <option value="1">High</option>
+              <option value="2">Normal</option>
+              <option value="3">Low</option>
+            </select>
+          </div>
+          <div class="md:col-span-4">
+            <label class="text-xs text-slate-600">Description</label>
+            <textarea name="desc" rows="3" class="w-full mt-1 p-2 rounded border border-slate-200"></textarea>
+          </div>
+          <div class="md:col-span-4 text-right">
+            <button type="button" id="closeModal" class="px-3 py-2 mr-2 border rounded">Cancel</button>
+            <button class="px-4 py-2 bg-indigo-600 text-white rounded">Save</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <footer class="mt-8 text-center text-slate-400 text-sm">
+     &copy; 2025 MS Corporation — All Rights Reserved.✨
+    </footer>
+  </div>
+
+<script>
+/* --------------- Utilities --------------- */
+const KEY_TASKS = 'ltm_tasks_v1';
+const KEY_HABITS = 'ltm_habits_v1';
+const KEY_LOGS = 'ltm_habitlogs_v1';
+
+const q = s => document.querySelector(s);
+const qa = s => document.querySelectorAll(s);
+
+const today = () => new Date().toISOString().slice(0,10);
+const uid = () => 'id_' + Math.random().toString(36).slice(2,11);
+
+/* --------------- Storage helpers --------------- */
+function load(key){ try{ return JSON.parse(localStorage.getItem(key)) || []; } catch(e){ return []; } }
+function save(key, data){ localStorage.setItem(key, JSON.stringify(data)); }
+
+/* --------------- App state --------------- */
+let tasks = load(KEY_TASKS);
+let habits = load(KEY_HABITS);
+let logs = load(KEY_LOGS); // { habitId: { "2025-11-27": true, ... }, ... }
+
+/* migrate older formats if needed */
+if (!Array.isArray(tasks)) tasks = [];
+if (!Array.isArray(habits)) habits = [];
+if (typeof logs !== 'object' || logs === null) logs = {};
+
+/* --------------- UI Init --------------- */
+q('#todayLabel').textContent = new Date().toLocaleDateString(undefined, { weekday:'long', month:'short', day:'numeric', year:"numeric" });
+
+/* --------------- Task CRUD & Render --------------- */
+function addTask(title, desc, due, priority){
+  tasks.push({ id: uid(), title, desc, due: due || null, priority: priority||2, status:0, createdAt: new Date().toISOString() });
+  save(KEY_TASKS, tasks); renderTasks();
+}
+function updateTask(id, obj){
+  const t = tasks.find(x=>x.id===id);
+  if(!t) return;
+  Object.assign(t, obj);
+  save(KEY_TASKS, tasks); renderTasks();
+}
+function deleteTask(id){
+  tasks = tasks.filter(x=>x.id!==id);
+  save(KEY_TASKS, tasks); renderTasks();
+}
+function toggleTask(id){
+  const t = tasks.find(x=>x.id===id);
+  if(t){ t.status = t.status ? 0 : 1; save(KEY_TASKS,tasks); renderTasks(); }
+}
+
+function formatDueLabel(d){
+  if(!d) return 'No due';
+  const dt = new Date(d);
+  const diff = Math.floor((new Date(d).setHours(0,0,0) - new Date().setHours(0,0,0)) / (1000*60*60*24));
+  if(d === today()) return 'Today';
+  if(diff < 0) return 'Overdue';
+  return dt.toLocaleDateString(undefined,{ month:'short', day:'numeric' });
+}
+
+function renderTasks(filter='all', search=''){
+  const container = q('#tasksList');
+  container.innerHTML = '';
+  // sort: incomplete first, then due, then priority then created
+  const sorted = [...tasks].sort((a,b)=>{
+    if(a.status!==b.status) return a.status - b.status;
+    if((a.due||'') !== (b.due||'')) {
+      if(!a.due) return 1;
+      if(!b.due) return -1;
+      return a.due.localeCompare(b.due);
+    }
+    if(a.priority !== b.priority) return a.priority - b.priority;
+    return a.createdAt.localeCompare(b.createdAt);
+  });
+
+  const now = today();
+  const list = sorted.filter(t=>{
+    if(search && !((t.title+t.desc).toLowerCase().includes(search.toLowerCase()))) return false;
+    if(filter === 'all') return true;
+    if(filter === 'today') return t.due === now;
+    if(filter === 'upcoming') return t.due && t.due > now;
+    if(filter === 'completed') return t.status === 1;
+    return true;
+  });
+
+  if(list.length === 0){
+    container.innerHTML = `<div class="card bg-white p-6 rounded-lg text-center text-slate-500">No tasks found</div>`;
+    return;
+  }
+
+  list.forEach(t=>{
+    const done = t.status === 1;
+    const priorityClass = t.priority==1 ? 'priority-1' : (t.priority==3 ? 'priority-3' : 'priority-2');
+    const el = document.createElement('div');
+    el.className = 'card bg-white p-4 rounded-lg flex items-start gap-4';
+    el.dataset.id = t.id;
+    el.innerHTML = `
+      <button class="toggleTask mt-1 w-9 h-9 rounded-full border flex items-center justify-center" title="Toggle complete">
+        ${ done ? '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-green-600" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 00-1.414-1.414L7 12.172 4.707 9.879A1 1 0 103.293 11.293l3 3a1 1 0 001.414 0l9-9z" clip-rule="evenodd" /></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" /></svg>' }
+      </button>
+      <div class="flex-1">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="${ done ? 'strike text-slate-600' : 'font-semibold text-slate-800' }">${escapeHtml(t.title)}</h3>
+              <span class="badge ${priorityClass}">${t.priority==1 ? 'High' : (t.priority==2 ? 'Normal' : 'Low')}</span>
+            </div>
+            ${ t.desc ? `<p class="text-sm mt-1 text-slate-500">${escapeHtml(t.desc)}</p>` : '' }
+          </div>
+          <div class="text-right text-sm">
+            <div class="text-slate-400">${formatDueLabel(t.due)}</div>
+            <div class="mt-2 flex gap-2">
+              <button class="editTask px-2 py-1 text-xs border rounded">Edit</button>
+              <button class="deleteTask px-2 py-1 text-xs border rounded text-red-600">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    container.appendChild(el);
+  });
+}
+
+/* --------------- Habit CRUD & Render --------------- */
+function addHabit(name){
+  const h = { id: uid(), name, createdAt: new Date().toISOString() };
+  habits.push(h);
+  save(KEY_HABITS, habits);
+  renderHabits();
+  renderHabitGrid();
+}
+function deleteHabit(id){
+  habits = habits.filter(h=>h.id!==id);
+  delete logs[id];
+  save(KEY_HABITS, habits);
+  save(KEY_LOGS, logs);
+  renderHabits();
+  renderHabitGrid();
+}
+function logHabitToday(id, date = today()){
+  logs[id] = logs[id] || {};
+  logs[id][date] = true;
+  save(KEY_LOGS, logs);
+  renderHabits();
+  renderHabitGrid();
+}
+function unlogHabit(id, date){
+  if(logs[id] && logs[id][date]) { delete logs[id][date]; save(KEY_LOGS, logs); renderHabits(); renderHabitGrid(); }
+}
+
+function computeStreak(id){
+  let s = 0;
+  let day = new Date();
+  while(true){
+    const d = day.toISOString().slice(0,10);
+    if(logs[id] && logs[id][d]) { s++; day.setDate(day.getDate()-1); } else break;
+  }
+  return s;
+}
+function weekCount(id){
+  const start = new Date(); start.setDate(start.getDate()-6);
+  let cnt = 0;
+  for(let i=0;i<7;i++){
+    const d = new Date(start.getFullYear(), start.getMonth(), start.getDate()+i).toISOString().slice(0,10);
+    if(logs[id] && logs[id][d]) cnt++;
+  }
+  return cnt;
+}
+
+function renderHabits(){
+  const container = q('#habitsList'); container.innerHTML = '';
+  if(habits.length === 0) { container.innerHTML = `<div class="text-slate-500">No habits yet. Add one above.</div>`; return; }
+  habits.forEach(h=>{
+    const id = h.id;
+    const st = computeStreak(id);
+    const wk = weekCount(id);
+    const hasToday = logs[id] && logs[id][today()];
+    const el = document.createElement('div');
+    el.className = 'p-3 rounded border border-slate-100 flex items-center justify-between gap-3';
+    el.innerHTML = `
+      <div>
+        <div class="font-medium">${escapeHtml(h.name)}</div>
+        <div class="text-xs text-slate-400">This week: ${wk} • Streak: <span class="font-semibold">${st}</span> days</div>
+      </div>
+      <div class="flex flex-col items-end gap-2">
+        <div class="flex gap-2">
+          <button class="logHabit px-2 py-1 rounded border" data-id="${id}">${ hasToday ? 'Done ✓' : 'Mark Today' }</button>
+          <button class="viewHabit px-2 py-1 rounded border" data-id="${id}">View</button>
+        </div>
+        <button class="deleteHabit text-xs text-red-600" data-id="${id}">Delete</button>
+      </div>
+    `;
+    container.appendChild(el);
+  });
+}
+
+function renderHabitGrid(){
+  const container = q('#habitGrid');
+  container.innerHTML = '';
+  if(habits.length === 0){ container.innerHTML = `<div class="text-slate-400">No habits to show.</div>`; return; }
+
+  // last 30 dates
+  const dates = [];
+  for(let i=29;i>=0;i--){
+    const d = new Date(); d.setDate(d.getDate() - i);
+    dates.push(d.toISOString().slice(0,10));
+  }
+
+  habits.forEach(h=>{
+    const id = h.id;
+    const row = document.createElement('div');
+    row.innerHTML = `
+      <div class="flex items-center justify-between">
+        <div class="text-sm font-medium">${escapeHtml(h.name)}</div>
+        <div class="text-xs text-slate-400">${computeStreak(id)}d streak</div>
+      </div>
+      <div class="mt-2 grid grid-cols-10 gap-2">
+        ${dates.map(d => `<div title="${d}" class="small-square ${ logs[id] && logs[id][d] ? 'bg-emerald-500' : 'bg-slate-200' }"></div>`).join('')}
+      </div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+/* --------------- Forms & Events --------------- */
+q('#taskForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const title = q('#taskTitle').value.trim();
+  if(!title) return alert('Title required');
+  addTask(title, q('#taskDesc').value.trim(), q('#taskDue').value || null, parseInt(q('#taskPriority').value));
+  e.target.reset();
+});
+
+q('#clearTaskForm').addEventListener('click', ()=> q('#taskForm').reset());
+
+q('#tasksList').addEventListener('click', e=>{
+  const el = e.target.closest('[data-id]');
+  const id = el && el.dataset.id;
+  if(e.target.closest('.toggleTask')) { if(id) toggleTask(id); return; }
+  if(e.target.closest('.deleteTask')){ if(!confirm('Delete this task?')) return; if(id) deleteTask(id); return; }
+  if(e.target.closest('.editTask')){ 
+    // open modal with data
+    const t = tasks.find(x=>x.id===id);
+    if(!t) return;
+    const m = q('#modal'); m.classList.remove('hidden'); m.style.display = 'flex';
+    const form = q('#editForm');
+    form.id.value = t.id; form.title.value = t.title; form.desc.value = t.desc || ''; form.due.value = t.due || ''; form.priority.value = t.priority || 2;
+  }
+});
+
+q('#editForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const form = e.target;
+  const id = form.id.value;
+  if(!id) return;
+  updateTask(id, {
+    title: form.title.value.trim(),
+    desc: form.desc.value.trim(),
+    due: form.due.value || null,
+    priority: parseInt(form.priority.value)
+  });
+  closeModal();
+});
+
+q('#closeModal').addEventListener('click', closeModal);
+function closeModal(){ q('#modal').classList.add('hidden'); q('#modal').style.display='none'; }
+
+/* Filters + search */
+qa('.filterBtn').forEach(b => b.addEventListener('click', (ev)=>{
+  qa('.filterBtn').forEach(x=>x.classList.remove('bg-indigo-50','border-indigo-200'));
+  ev.target.classList.add('bg-indigo-50','border-indigo-200');
+  renderTasks(ev.target.dataset.filter, q('#searchInput').value.trim());
+}));
+q('#searchInput').addEventListener('input', e => {
+  const active = document.querySelector('.filterBtn.bg-indigo-50')?.dataset.filter || 'all';
+  renderTasks(active, e.target.value.trim());
+});
+
+/* Habits events */
+q('#habitForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  const name = q('#habitName').value.trim();
+  if(!name) return;
+  addHabit(name);
+  e.target.reset();
+});
+
+q('#habitsList').addEventListener('click', async e=>{
+  const btn = e.target.closest('button');
+  if(!btn) return;
+  const id = btn.dataset.id;
+  if(btn.classList.contains('logHabit')){
+    logHabitToday(id);
+    return;
+  }
+  if(btn.classList.contains('deleteHabit')){
+    if(!confirm('Delete habit and its logs?')) return;
+    deleteHabit(id);
+    return;
+  }
+  if(btn.classList.contains('viewHabit')){
+    // quick popup: last 7 days with done/undone
+    const start = new Date(); start.setDate(start.getDate() - 6);
+    let html = `<div style="font-family:Inter,system-ui;padding:12px">`;
+    html += `<h3 style="margin:0 0 8px">${escapeHtml(habits.find(h=>h.id===id)?.name || '')} — Last 7 days</h3><ul style="padding-left:18px">`;
+    for(let i=0;i<7;i++){
+      const d = new Date(start.getFullYear(), start.getMonth(), start.getDate()+i).toISOString().slice(0,10);
+      html += `<li>${d} — ${logs[id] && logs[id][d] ? 'Done' : '—'}</li>`;
+    }
+    html += `</ul></div>`;
+    const w = window.open('','_blank','width=320,height=380');
+    w.document.write(html);
+    return;
+  }
+});
+
+/* Export / Import */
+q('#exportBtn').addEventListener('click', ()=>{
+  const data = { tasks, habits, logs, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'ltm-export.json'; a.click();
+  URL.revokeObjectURL(url);
+});
+
+q('#importBtn').addEventListener('click', ()=> q('#importFile').click());
+q('#importFile').addEventListener('change', e=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = ev => {
+    try {
+      const obj = JSON.parse(ev.target.result);
+      if(confirm('Import will overwrite current local data. Continue?')){
+        tasks = Array.isArray(obj.tasks) ? obj.tasks : [];
+        habits = Array.isArray(obj.habits) ? obj.habits : [];
+        logs = typeof obj.logs === 'object' && obj.logs !== null ? obj.logs : {};
+        save(KEY_TASKS, tasks); save(KEY_HABITS, habits); save(KEY_LOGS, logs);
+        renderTasks(); renderHabits(); renderHabitGrid();
+      }
+    } catch(err){ alert('Invalid JSON'); }
+  };
+  r.readAsText(f);
+});
+
+/* --------------- Small helpers --------------- */
+function escapeHtml(s){ if(!s) return ''; return s.replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+/* --------------- Initial render --------------- */
+renderTasks();
+renderHabits();
+renderHabitGrid();
+
+/* add a small keyboard shortcut: n => focus new task */
+window.addEventListener('keydown', e=>{
+  if(e.key === 'n' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA'){
+    q('#taskTitle').focus();
+  }
+});
+</script>
+
+</body>
+</html>

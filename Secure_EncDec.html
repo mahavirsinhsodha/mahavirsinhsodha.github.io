@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secure Encryption App</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    .container {
+      background: rgba(30, 41, 59, 0.8);
+      padding: 30px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    h2 {
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-weight: 600;
+    }
+    
+    .input-group {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #cbd5e1;
+    }
+    
+    textarea {
+      width: 100%;
+      height: 100px;
+      border-radius: 10px;
+      padding: 15px;
+      font-size: 16px;
+      border: 2px solid #334155;
+      background: #1e293b;
+      color: #fff;
+      resize: none;
+      transition: all 0.3s;
+    }
+    
+    textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+    
+    .password-group {
+      margin-bottom: 20px;
+    }
+    
+    input[type="password"] {
+      width: 100%;
+      padding: 12px 15px;
+      border-radius: 10px;
+      font-size: 16px;
+      border: 2px solid #334155;
+      background: #1e293b;
+      color: #fff;
+      transition: all 0.3s;
+    }
+    
+    input[type="password"]:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    button {
+      flex: 1;
+      padding: 12px 15px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 600;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    button:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    .encrypt-btn {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }
+    
+    .decrypt-btn {
+      background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+    }
+    
+    .clear-btn {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+    
+    .output {
+      margin-top: 20px;
+      word-wrap: break-word;
+      background: #334155;
+      padding: 20px;
+      border-radius: 10px;
+      font-size: 16px;
+      min-height: 80px;
+      text-align: left;
+      border: 1px solid #475569;
+      position: relative;
+    }
+    
+    .output-label {
+      position: absolute;
+      top: -10px;
+      left: 15px;
+      background: #1e293b;
+      padding: 0 10px;
+      font-size: 14px;
+      color: #cbd5e1;
+    }
+    
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #475569;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .copy-btn:hover {
+      background: #64748b;
+    }
+    
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #10b981;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transform: translateX(150%);
+      transition: transform 0.3s;
+      z-index: 1000;
+    }
+    
+    .notification.show {
+      transform: translateX(0);
+    }
+    
+    .notification.error {
+      background: #ef4444;
+    }
+    
+    .info-text {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #94a3b8;
+      text-align: left;
+      line-height: 1.5;
+    }
+    
+    .info-text a {
+      color: #60a5fa;
+      text-decoration: none;
+    }
+    
+    .info-text a:hover {
+      text-decoration: underline;
+    }
+    
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+      
+      .button-group {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      Secure Encryption App
+    </h2>
+    
+    <div class="input-group">
+      <label for="inputText">Message</label>
+      <textarea id="inputText" placeholder="Type your message here..."></textarea>
+    </div>
+    
+    <div class="password-group">
+      <label for="password">Encryption Password</label>
+      <input type="password" id="password" placeholder="Enter a secure password...">
+    </div>
+    
+    <div class="button-group">
+      <button class="encrypt-btn" onclick="encryptText()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        Encrypt
+      </button>
+      <button class="decrypt-btn" onclick="decryptText()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 9.33-2.5"></path>
+        </svg>
+        Decrypt
+      </button>
+      <button class="clear-btn" onclick="clearAll()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 6h18"></path>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path>
+          <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+        Clear
+      </button>
+    </div>
+    
+    <div class="output">
+      <div class="output-label">Result</div>
+      <div id="outputText">Your encrypted/decrypted message will appear here...</div>
+      <button class="copy-btn" onclick="copyToClipboard()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        Copy
+      </button>
+    </div>
+    
+    <div class="info-text">
+      <p><strong>Note:</strong> This app uses AES-GCM encryption for security. Your password is used to derive an encryption key, but it's not stored anywhere. Make sure to remember your password as it's required for decryption.</p>
+    </div><footer style="text-align: center; padding: 10px; color: rgb(255, 255, 255); margin-top: 20px; font-size:11px; ">
+    
+        <strong>&copy; 2025 MS Corporation — All Rights Reserved.</strong>
+    </footer>
+  </div>
+  
+  <div class="notification" id="notification">Copied to clipboard!</div>
+
+  <script>
+    // Generate a key from password using PBKDF2
+    async function getKeyFromPassword(password, salt) {
+      const encoder = new TextEncoder();
+      const keyMaterial = await window.crypto.subtle.importKey(
+        'raw',
+        encoder.encode(password),
+        'PBKDF2',
+        false,
+        ['deriveKey']
+      );
+      
+      return await window.crypto.subtle.deriveKey(
+        {
+          name: 'PBKDF2',
+          salt: salt,
+          iterations: 100000,
+          hash: 'SHA-256'
+        },
+        keyMaterial,
+        { name: 'AES-GCM', length: 256 },
+        false,
+        ['encrypt', 'decrypt']
+      );
+    }
+    
+    // Encrypt text using AES-GCM
+    async function encryptText() {
+      const text = document.getElementById("inputText").value;
+      const password = document.getElementById("password").value;
+      
+      if (text === "") {
+        showNotification("Please enter some text to encrypt!", true);
+        return;
+      }
+      
+      if (password === "") {
+        showNotification("Please enter a password for encryption!", true);
+        return;
+      }
+      
+      try {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(text);
+        
+        // Generate a random salt and IV
+        const salt = window.crypto.getRandomValues(new Uint8Array(16));
+        const iv = window.crypto.getRandomValues(new Uint8Array(12));
+        
+        // Derive key from password
+        const key = await getKeyFromPassword(password, salt);
+        
+        // Encrypt the data
+        const encrypted = await window.crypto.subtle.encrypt(
+          {
+            name: 'AES-GCM',
+            iv: iv
+          },
+          key,
+          data
+        );
+        
+        // Combine salt, iv, and encrypted data
+        const combined = new Uint8Array(salt.length + iv.length + encrypted.byteLength);
+        combined.set(salt);
+        combined.set(iv, salt.length);
+        combined.set(new Uint8Array(encrypted), salt.length + iv.length);
+        
+        // Convert to base64 for display
+        const encryptedBase64 = btoa(String.fromCharCode(...combined));
+        document.getElementById("outputText").innerText = encryptedBase64;
+        showNotification("Text encrypted successfully!");
+      } catch (error) {
+        console.error("Encryption error:", error);
+        showNotification("Encryption failed. Please try again.", true);
+      }
+    }
+    
+    // Decrypt text using AES-GCM
+    async function decryptText() {
+      const text = document.getElementById("inputText").value;
+      const password = document.getElementById("password").value;
+      
+      if (text === "") {
+        showNotification("Please enter encrypted text!", true);
+        return;
+      }
+      
+      if (password === "") {
+        showNotification("Please enter the decryption password!", true);
+        return;
+      }
+      
+      try {
+        // Convert from base64
+        const combined = new Uint8Array(
+          atob(text).split('').map(char => char.charCodeAt(0))
+        );
+        
+        // Extract salt, iv, and encrypted data
+        const salt = combined.slice(0, 16);
+        const iv = combined.slice(16, 28);
+        const encrypted = combined.slice(28);
+        
+        // Derive key from password
+        const key = await getKeyFromPassword(password, salt);
+        
+        // Decrypt the data
+        const decrypted = await window.crypto.subtle.decrypt(
+          {
+            name: 'AES-GCM',
+            iv: iv
+          },
+          key,
+          encrypted
+        );
+        
+        // Convert to text
+        const decoder = new TextDecoder();
+        const decryptedText = decoder.decode(decrypted);
+        document.getElementById("outputText").innerText = decryptedText;
+        showNotification("Text decrypted successfully!");
+      } catch (error) {
+        console.error("Decryption error:", error);
+        showNotification("Decryption failed. Please check your password and try again.", true);
+      }
+    }
+    
+    // Clear all fields
+    function clearAll() {
+      document.getElementById("inputText").value = "";
+      document.getElementById("password").value = "";
+      document.getElementById("outputText").innerText = "Your encrypted/decrypted message will appear here...";
+      showNotification("All fields cleared!");
+    }
+    
+    // Copy output to clipboard
+    function copyToClipboard() {
+      const outputText = document.getElementById("outputText").innerText;
+      if (outputText && outputText !== "Your encrypted/decrypted message will appear here...") {
+        navigator.clipboard.writeText(outputText)
+          .then(() => showNotification("Copied to clipboard!"))
+          .catch(err => showNotification("Failed to copy to clipboard", true));
+      } else {
+        showNotification("Nothing to copy!", true);
+      }
+    }
+    
+    // Show notification
+    function showNotification(message, isError = false) {
+      const notification = document.getElementById("notification");
+      notification.innerText = message;
+      notification.classList.toggle("error", isError);
+      notification.classList.add("show");
+      
+      setTimeout(() => {
+        notification.classList.remove("show");
+      }, 3000);
+    }
+    
+    // Allow pressing Enter in textarea to encrypt
+    document.getElementById("inputText").addEventListener("keydown", function(e) {
+      if (e.key === "Enter" && e.ctrlKey) {
+        encryptText();
+      }
+    });
+  </script>
+</body>
+</html>

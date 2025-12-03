@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Journey: Galaxy to Earth</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            overflow-x: hidden;
+            color: white;
+            background-color: #000;
+        }
+
+        .container {
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            perspective: 10px;
+            scroll-behavior: smooth;
+        }
+
+        header {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            transform-style: preserve-3d;
+            z-index: -1;
+        }
+
+        .background {
+            transform: translateZ(-10px) scale(2);
+        }
+
+        .foreground {
+            transform: translateZ(-5px) scale(1.5);
+        }
+
+        .background,
+        .foreground {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        .title {
+            font-size: 7rem;
+            color: white;
+            text-shadow: 0 0 15px rgba(0, 150, 255, 0.8);
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            text-align: center;
+            max-width: 800px;
+            padding: 0 2rem;
+        }
+
+        section {
+            padding: 5rem 2rem;
+            background-color: #0a0a2a;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: 3.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: #4db8ff;
+        }
+
+        .section-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            text-align: center;
+        }
+
+        .bg {
+            position: relative;
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .bg-content {
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 800px;
+            margin: 0 2rem;
+        }
+
+        .bg h2 {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            color: #fff;
+            text-shadow: 0 0 10px rgba(0, 150, 255, 0.7);
+        }
+
+        .bg p {
+            font-size: 1.3rem;
+            line-height: 1.7;
+        }
+
+        .milky-way {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                              url('https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-1.2.1&auto=format&fit=crop&w=1951&q=80');
+        }
+
+        .solar-system {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                              url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?ixlib=rb-1.2.1&auto=format&fit=crop&w=2111&q=80');
+        }
+
+        .earth {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                              url('https://images.unsplash.com/photo-1446776877081-d282a0f896e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1952&q=80');
+        }
+
+        .mountains {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                              url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+        }
+
+        .rivers {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                              url('https://images.unsplash.com/photo-1439066615861-d1af74d74000?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+        }
+
+        .lakes {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                              url('https://images.unsplash.com/photo-1476231682828-37e571bc172f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1934&q=80');
+        }
+
+        .deserts {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                              url('https://images.unsplash.com/photo-1509316785289-025f5b846b35?ixlib=rb-1.2.1&auto=format&fit=crop&w=1955&q=80');
+        }
+
+        .ice-lands {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                              url('https://images.unsplash.com/photo-1464278533981-50106e6176b1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+        }
+
+        .skyscrapers {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                              url('https://images.unsplash.com/photo-1487958449943-2429e8be8625?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+        }
+
+        .forests {
+            background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+                              url('https://images.unsplash.com/photo-1448375240586-882707db888b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+        }
+
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 1; }
+        }
+
+        .navigation {
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            z-index: 100;
+        }
+
+        .nav-dot {
+            display: block;
+            width: 12px;
+            height: 12px;
+            margin: 15px 0;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-dot.active {
+            background-color: white;
+            transform: scale(1.3);
+        }
+
+        .scroll-indicator {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 100;
+            animation: bounce 2s infinite;
+        }
+
+        .scroll-indicator i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 5px;
+            background: linear-gradient(to right, #00a8ff, #0097e6);
+            z-index: 1000;
+            transition: width 0.2s ease;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 4rem;
+            }
+            
+            .bg h2 {
+                font-size: 2.5rem;
+            }
+            
+            .section-title {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar"></div>
+    
+    <div class="container">
+        <header>
+            <img src="https://images.unsplash.com/photo-1465101162946-4377e57745c3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80" alt="" class="background">
+            <img src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?ixlib=rb-1.2.1&auto=format&fit=crop&w=2111&q=80" alt="" class="foreground">
+            <h1 class="title">Cosmic Journey</h1>
+            <p class="subtitle">From the vast expanse of the Milky Way to the intricate beauty of Earth's landscapes</p>
+            <div class="stars" id="stars"></div>
+        </header>
+
+        <section>
+            <h2 class="section-title">The Journey Begins</h2>
+            <div class="section-content">
+                <p>Embark on an extraordinary voyage from the cosmic scale of our galaxy down to the intricate details of our home planet. This journey will take you through the vastness of space, the majesty of natural landscapes, the marvels of human civilization, and finally back to the serene beauty of nature.</p>
+                <br>
+                <p>Scroll down to begin your descent from the Milky Way to Earth...</p>
+            </div>
+        </section>
+
+        <div class="bg milky-way">
+            <div class="bg-content">
+                <h2>Milky Way Galaxy</h2>
+                <p>Our cosmic home, a barred spiral galaxy spanning 100,000 light-years, containing over 100 billion stars. From this vantage point, we begin our journey inward to explore our tiny corner of the universe.</p>
+            </div>
+        </div>
+
+        <section>
+            <h2 class="section-title">The Galactic Neighborhood</h2>
+            <div class="section-content">
+                <p>The Milky Way is just one of billions of galaxies in the observable universe. Within our galaxy, we find our Solar System located in the Orion Arm, about 27,000 light-years from the galactic center.</p>
+            </div>
+        </section>
+
+        <div class="bg solar-system">
+            <div class="bg-content">
+                <h2>Solar System</h2>
+                <p>Our planetary system consisting of the Sun and everything bound to it by gravity - eight planets, dozens of moons, millions of asteroids, comets, and meteoroids. Among these worlds, one special planet stands out.</p>
+            </div>
+        </div>
+
+        <section>
+            <h2 class="section-title">Our Celestial Home</h2>
+            <div class="section-content">
+                <p>Earth, the third planet from the Sun, is the only known astronomical object to harbor life. Its unique combination of atmosphere, liquid water, and distance from the Sun creates the perfect conditions for life to flourish.</p>
+            </div>
+        </section>
+
+        <div class="bg earth">
+            <div class="bg-content">
+                <h2>Planet Earth</h2>
+                <p>The Blue Marble, our oasis in space. With its vast oceans, protective atmosphere, and moderate temperatures, Earth is home to millions of species including humans. From orbit, we can appreciate the planet's beauty and fragility.</p>
+            </div>
+        </div>
+
+        <section>
+            <h2 class="section-title">Earth's Diverse Landscapes</h2>
+            <div class="section-content">
+                <p>As we descend through the atmosphere, Earth's diverse landscapes come into view - from towering mountains and flowing rivers to serene lakes, vast deserts, and frozen ice lands. Each environment supports unique ecosystems and showcases the planet's geological history.</p>
+            </div>
+        </section>
+
+        <div class="bg mountains">
+            <div class="bg-content">
+                <h2>Majestic Mountains</h2>
+                <p>Earth's towering peaks, shaped over millions of years by tectonic forces. Mountains influence weather patterns, provide habitats for specialized species, and offer breathtaking vistas that have inspired humans for millennia.</p>
+            </div>
+        </div>
+
+        <div class="bg rivers">
+            <div class="bg-content">
+                <h2>Flowing Rivers</h2>
+                <p>The lifeblood of continents, rivers carve landscapes, transport nutrients, and provide freshwater to ecosystems and human civilizations. They connect mountains to oceans in a continuous cycle of erosion and deposition.</p>
+            </div>
+        </div>
+
+        <div class="bg lakes">
+            <div class="bg-content">
+                <h2>Serene Lakes & Ponds</h2>
+                <p>Still bodies of freshwater that provide critical habitats, recreational opportunities, and sources of drinking water. Lakes form in geological basins and reflect the sky above, creating mirror-like surfaces of breathtaking beauty.</p>
+            </div>
+        </div>
+
+        <div class="bg deserts">
+            <div class="bg-content">
+                <h2>Vast Deserts</h2>
+                <p>Though seemingly barren, deserts host specially adapted life forms and showcase the raw power of geological processes. These arid landscapes cover about one-third of Earth's land surface and display stunning patterns of sand and rock.</p>
+            </div>
+        </div>
+
+        <div class="bg ice-lands">
+            <div class="bg-content">
+                <h2>Frozen Ice Lands</h2>
+                <p>Polar regions and high-altitude glaciers that play a crucial role in regulating Earth's climate. These frozen landscapes, while inhospitable to most life, are critical indicators of climate change and store most of Earth's freshwater.</p>
+            </div>
+        </div>
+
+        <section>
+            <h2 class="section-title">Human Impact</h2>
+            <div class="section-content">
+                <p>As we continue our journey, we encounter the marks of human civilization. Our species has transformed landscapes, built incredible structures, and created complex societies. These human landscapes exist alongside and sometimes in conflict with natural ecosystems.</p>
+            </div>
+        </section>
+
+        <div class="bg skyscrapers">
+            <div class="bg-content">
+                <h2>Urban Skyscrapers</h2>
+                <p>Human ingenuity manifested in steel, glass, and concrete. Cities represent both our greatest achievements and our biggest challenges - centers of culture, innovation, and economic activity that must balance development with sustainability.</p>
+            </div>
+        </div>
+
+        <section>
+            <h2 class="section-title">Return to Nature</h2>
+            <div class="section-content">
+                <p>Beyond the urban landscapes, nature continues to thrive. Forests, the lungs of our planet, remind us of the enduring power and beauty of the natural world that sustains all life, including our own.</p>
+            </div>
+        </section>
+
+        <div class="bg forests">
+            <div class="bg-content">
+                <h2>Verdant Forests</h2>
+                <p>Lush ecosystems teeming with biodiversity, forests regulate climate, produce oxygen, and provide resources and inspiration. They represent the intricate web of life that connects all living things on our planet.</p>
+            </div>
+        </div>
+
+        <section>
+            <h2 class="section-title">Our Shared Home</h2>
+            <div class="section-content">
+                <p>From the cosmic scale of galaxies to the intimate details of forests, we've journeyed through the wonders of our universe and our planet. This perspective reminds us of both our insignificance in the cosmos and our profound responsibility to care for our unique, life-giving world.</p>
+                <br>
+                <p>Earth is the only home we've ever known. Let's protect its beauty and diversity for generations to come.</p>
+            </div>
+        </section>
+
+        <div class="scroll-indicator">
+            <i class="fas fa-chevron-down"></i>
+        </div>
+
+        <div class="navigation">
+            <div class="nav-dot active" data-section="0"></div>
+            <div class="nav-dot" data-section="1"></div>
+            <div class="nav-dot" data-section="2"></div>
+            <div class="nav-dot" data-section="3"></div>
+            <div class="nav-dot" data-section="4"></div>
+            <div class="nav-dot" data-section="5"></div>
+            <div class="nav-dot" data-section="6"></div>
+            <div class="nav-dot" data-section="7"></div>
+            <div class="nav-dot" data-section="8"></div>
+            <div class="nav-dot" data-section="9"></div>
+            <div class="nav-dot" data-section="10"></div>
+        </div>
+    </div>
+
+    <script>
+        // Create stars for the header
+        const starsContainer = document.getElementById('stars');
+        for (let i = 0; i < 200; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.width = `${Math.random() * 3}px`;
+            star.style.height = star.style.width;
+            star.style.animationDelay = `${Math.random() * 5}s`;
+            starsContainer.appendChild(star);
+        }
+
+        // Progress bar
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.querySelector('.progress-bar').style.width = `${scrolled}%`;
+        });
+
+        // Navigation dots
+        const sections = document.querySelectorAll('section, .bg');
+        const navDots = document.querySelectorAll('.nav-dot');
+        
+        window.addEventListener('scroll', () => {
+            let current = '';
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= (sectionTop - sectionHeight / 3)) {
+                    current = section.getAttribute('id') || section.className;
+                }
+            });
+            
+            navDots.forEach(dot => {
+                dot.classList.remove('active');
+                if (dot.getAttribute('data-section') === current) {
+                    dot.classList.add('active');
+                }
+            });
+        });
+        
+        navDots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                const sectionIndex = dot.getAttribute('data-section');
+                sections[sectionIndex].scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Parallax effect for header
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const background = document.querySelector('.background');
+            const foreground = document.querySelector('.foreground');
+            const title = document.querySelector('.title');
+            
+            background.style.transform = `translateY(${scrolled * 0.5}px)`;
+            foreground.style.transform = `translateY(${scrolled * 0.3}px)`;
+            title.style.transform = `translateY(${scrolled * 0.7}px)`;
+        });
+    </script>
+</body>
+</html>

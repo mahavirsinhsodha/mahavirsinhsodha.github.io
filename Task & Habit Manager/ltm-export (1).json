@@ -1,0 +1,78 @@
+{
+  "tasks": [
+    {
+      "id": "id_up560bcno",
+      "title": "Parallax Website",
+      "desc": "Space Graphics or Natural Environment like jese jese hum niche jaayenge hum zoom in karenge and at first milky way galaxy dikhegi uske baad uske ander ander zoom karte karte earth aayega and baadme mountain, rivers, natural things ...",
+      "due": "2025-11-27",
+      "priority": 2,
+      "status": 0,
+      "createdAt": "2025-11-27T16:36:40.988Z"
+    },
+    {
+      "id": "id_tk8lbbs13",
+      "title": "Link Shortner App",
+      "desc": "Like Bit.ly",
+      "due": "2025-11-28",
+      "priority": 1,
+      "status": 0,
+      "createdAt": "2025-11-27T16:37:15.699Z"
+    },
+    {
+      "id": "id_8c9c3z3fy",
+      "title": "QR Code Maker and scanner",
+      "desc": "Qr maker and reader",
+      "due": "2025-11-28",
+      "priority": 2,
+      "status": 0,
+      "createdAt": "2025-11-27T16:37:53.435Z"
+    },
+    {
+      "id": "id_12hamp5ja",
+      "title": "Cooking Ideas app",
+      "desc": "Recipe finder API",
+      "due": "2025-11-29",
+      "priority": 3,
+      "status": 0,
+      "createdAt": "2025-11-27T16:38:28.701Z"
+    },
+    {
+      "id": "id_xnvds4vgu",
+      "title": "Space Exploration APP",
+      "desc": "Space / planets/ interstellar info with graphic animations",
+      "due": "2025-12-01",
+      "priority": 3,
+      "status": 0,
+      "createdAt": "2025-11-27T16:39:09.278Z"
+    }
+  ],
+  "habits": [
+    {
+      "id": "id_ms395jnex",
+      "name": "Yoga",
+      "createdAt": "2025-11-27T16:23:14.290Z"
+    },
+    {
+      "id": "id_t0vsz4qf0",
+      "name": "Exercise",
+      "createdAt": "2025-11-27T16:31:40.130Z"
+    },
+    {
+      "id": "id_cwljtu3js",
+      "name": "MovieS",
+      "createdAt": "2025-11-27T16:54:04.517Z"
+    }
+  ],
+  "logs": {
+    "id_ms395jnex": {
+      "2025-11-27": true
+    },
+    "id_t0vsz4qf0": {
+      "2025-11-27": true
+    },
+    "id_cwljtu3js": {
+      "2025-11-27": true
+    }
+  },
+  "exportedAt": "2025-11-27T16:55:26.792Z"
+}

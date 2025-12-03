@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Maker & Reader</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<!-- <script src="https://unpkg.com/jsqr/dist/jsQR.js"></script> -->
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .app-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            flex: 1;
+            min-width: 300px;
+            max-width: 500px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #2575fc;
+            text-align: center;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            border-color: #2575fc;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(37, 117, 252, 0.2);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            background: #2575fc;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 10px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            background: #1a68e8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #a0a0a0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .qr-result {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f9f9f9;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px dashed #ddd;
+        }
+
+        #qrCodeImage {
+            max-width: 100%;
+            max-height: 200px;
+            display: none;
+        }
+
+        .camera-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block !important;
+        }
+
+        .scan-area {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border: 2px solid #2575fc;
+            border-radius: 8px;
+            box-shadow: 0 0 0 5000px rgba(0, 0, 0, 0.5);
+        }
+
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: #2575fc;
+            top: 0;
+            animation: scan 2s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            50% { top: 100%; }
+            100% { top: 0; }
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            min-height: 60px;
+            word-break: break-all;
+            border: 1px solid #eee;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-buttons button {
+            flex: 1;
+        }
+
+        .secondary-btn {
+            background: #6c757d;
+        }
+
+        .secondary-btn:hover {
+            background: #5a6268;
+        }
+
+        .success-btn {
+            background: #28a745;
+        }
+
+        .success-btn:hover {
+            background: #218838;
+        }
+
+        .danger-btn {
+            background: #dc3545;
+        }
+
+        .danger-btn:hover {
+            background: #c82333;
+        }
+
+        .instructions {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #666;
+            text-align: center;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: white;
+            opacity: 0.8;
+            font-size: 0.9rem;
+            padding: 20px;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #2575fc;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .success-message {
+            color: #155724;
+            background: #d4edda;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                flex-direction: column;
+            }
+            
+            .section {
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>QR Code Maker & Reader</h1>
+            <p class="subtitle">Create custom QR codes and scan existing ones with our easy-to-use web application</p>
+        </header>
+        
+        <div class="app-container">
+            <!-- QR Code Generator Section -->
+            <div class="section">
+                <h2 class="section-title"><i class="fas fa-qrcode"></i> Create QR Code</h2>
+                
+                <div class="input-group">
+                    <label for="qrContent">Enter text or URL:</label>
+                    <textarea id="qrContent" placeholder="Enter text, URL, or any content you want to encode..."></textarea>
+                </div>
+                
+                <div class="input-group">
+                    <label for="qrSize">QR Code Size:</label>
+                    <select id="qrSize">
+                        <option value="150x150">Small (150x150)</option>
+                        <option value="250x250" selected>Medium (250x250)</option>
+                        <option value="350x350">Large (350x350)</option>
+                    </select>
+                </div>
+                
+                <button id="generateBtn" type="button">
+                    <i class="fas fa-bolt"></i> Generate QR Code
+                </button>
+                
+                <div class="loading" id="generateLoading">
+                    <div class="loading-spinner"></div>
+                    <p>Generating QR Code...</p>
+                </div>
+                
+                <div class="error-message" id="generateError"></div>
+                
+                <div class="qr-result">
+                    <img id="qrCodeImage" alt="Generated QR Code">
+                    <p id="placeholderText">Your QR code will appear here</p>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="downloadBtn" type="button" class="secondary-btn" disabled>
+                        <i class="fas fa-download"></i> Download QR Code
+                    </button>
+                    <button id="clearBtn" type="button" class="secondary-btn">
+                        <i class="fas fa-trash"></i> Clear
+                    </button>
+                </div>
+            </div>
+            
+            <!-- QR Code Reader Section -->
+            <div class="section">
+                <h2 class="section-title"><i class="fas fa-camera"></i> Scan QR Code</h2>
+                
+                <div class="camera-container">
+                    <video id="video" playsinline></video>
+                    <div id="cameraPlaceholder">
+                        <i class="fas fa-camera fa-3x"></i>
+                        <p>Camera feed will appear here</p>
+                    </div>
+                    <div class="scan-area" style="display: none;">
+                        <div class="scan-line"></div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button id="startScanBtn" class="success-btn">
+                        <i class="fas fa-play"></i> Start Camera
+                    </button>
+                    <button id="stopScanBtn" class="danger-btn">
+                        <i class="fas fa-stop"></i> Stop Camera
+                    </button>
+                </div>
+                
+                <p class="instructions">Point your camera at a QR code to scan it</p>
+                
+                <div class="loading" id="scanLoading">
+                    <div class="loading-spinner"></div>
+                    <p>Scanning for QR codes...</p>
+                </div>
+                
+                <div class="error-message" id="scanError"></div>
+                <div class="success-message" id="scanSuccess"></div>
+                
+                <div class="result">
+                    <p id="scanResult">Scan result will appear here</p>
+                </div>
+
+                <input type="file" id="qrImageInput" accept="image/*" style="display:none">
+<button id="uploadBtn">Upload QR Image</button>
+
+                <button id="copyResultBtn" class="secondary-btn" disabled>
+                    <i class="fas fa-copy"></i> Copy Result
+                </button>
+            </div>
+        </div>
+        
+        <footer>
+            <p>&copy; 2025 MS Corporation — All Rights Reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        // QR Code Generator Elements
+        const qrContent = document.getElementById('qrContent');
+        const qrSize = document.getElementById('qrSize');
+        const generateBtn = document.getElementById('generateBtn');
+        const qrCodeImage = document.getElementById('qrCodeImage');
+        const placeholderText = document.getElementById('placeholderText');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const generateLoading = document.getElementById('generateLoading');
+        const generateError = document.getElementById('generateError');
+
+        // QR Code Reader Elements
+        const video = document.getElementById('video');
+        const startScanBtn = document.getElementById('startScanBtn');
+        const stopScanBtn = document.getElementById('stopScanBtn');
+        const scanResult = document.getElementById('scanResult');
+        const scanArea = document.querySelector('.scan-area');
+        const cameraPlaceholder = document.getElementById('cameraPlaceholder');
+        const scanLoading = document.getElementById('scanLoading');
+        const scanError = document.getElementById('scanError');
+        const scanSuccess = document.getElementById('scanSuccess');
+        const copyResultBtn = document.getElementById('copyResultBtn');
+
+        // State variables
+        let scanning = false;
+        let stream = null;
+        let scanInterval = null;
+
+        // QR Code Generator Functions
+        generateBtn.addEventListener('click', generateQRCode);
+        clearBtn.addEventListener('click', clearQRCode);
+        downloadBtn.addEventListener('click', downloadQRCode);
+        copyResultBtn.addEventListener('click', copyResult);
+
+        async function generateQRCode() {
+            const content = qrContent.value.trim();
+            if (!content) {
+                showError(generateError, 'Please enter some text or a URL');
+                return;
+            }
+
+            // Show loading state
+            generateLoading.style.display = 'block';
+            generateError.style.display = 'none';
+            generateBtn.disabled = true;
+
+            try {
+                // Using a reliable QR code API
+                const size = qrSize.value;
+                const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=${size}&data=${encodeURIComponent(content)}`;
+                
+                // Set the image source to the API URL
+                qrCodeImage.src = apiUrl;
+                
+                // Wait for image to load
+                await new Promise((resolve, reject) => {
+                    qrCodeImage.onload = resolve;
+                    qrCodeImage.onerror = reject;
+                });
+                
+                // Show the QR code
+                qrCodeImage.style.display = 'block';
+                placeholderText.style.display = 'none';
+                downloadBtn.disabled = false;
+                
+            } catch (error) {
+                console.error('Error generating QR code:', error);
+                showError(generateError, 'Failed to generate QR code. Please try again.');
+            } finally {
+                generateLoading.style.display = 'none';
+                generateBtn.disabled = false;
+            }
+        }
+
+        function clearQRCode() {
+            qrContent.value = '';
+            qrCodeImage.style.display = 'none';
+            placeholderText.style.display = 'block';
+            downloadBtn.disabled = true;
+            generateError.style.display = 'none';
+        }
+
+        async function downloadQRCode() {
+    // ensure we have a URL
+    const urlToFetch = lastQRUrl || (qrCodeImage && qrCodeImage.src) || "";
+    if (!urlToFetch) {
+        alert("No QR available to download.");
+        return;
+    }
+
+    try {
+        // fetch the image as blob
+        const res = await fetch(urlToFetch, { cache: "no-store", mode: "cors" });
+        if (!res.ok) throw new Error("Network response not ok: " + res.status);
+        const blob = await res.blob();
+        console.log("downloadQRCode: fetched blob", blob.type, blob.size);
+
+        const filename = "qrcode.png";
+
+        // IE / old Edge
+        if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+            window.navigator.msSaveOrOpenBlob(blob, filename);
+            return;
+        }
+
+        // Create object URL
+        const objUrl = URL.createObjectURL(blob);
+
+        // Try programmatic download via anchor + dispatched MouseEvent (more reliable)
+        const a = document.createElement("a");
+        a.style.display = "none";
+        a.href = objUrl;
+        a.download = filename;
+
+        document.body.appendChild(a);
+
+        // Dispatch a real MouseEvent (better than a.click() for some browsers)
+        const evt = new MouseEvent("click", {
+            view: window,
+            bubbles: true,
+            cancelable: true
+        });
+        a.dispatchEvent(evt);
+
+        // Cleanup
+        setTimeout(() => {
+            URL.revokeObjectURL(objUrl);
+            a.remove();
+        }, 1000);
+
+        // iOS fallback: Some iOS browsers ignore download and just open the image.
+        // If that happens, let user know how to save manually.
+    } catch (err) {
+        console.error("downloadQRCode error:", err);
+        // final fallback: open the image in a new tab and instruct user to save manually
+        const tryOpen = confirm("Auto-download failed — open image in new tab so you can save it manually?");
+        if (tryOpen) window.open(urlToFetch, "_blank");
+        else error.textContent = "Failed to download QR. See console for details.";
+    }
+}
+
+
+        // QR Code Reader Functions
+        startScanBtn.addEventListener('click', startScanning);
+        stopScanBtn.addEventListener('click', stopScanning);
+
+        async function startScanning() {
+            try {
+                // Request camera access
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "environment" } 
+                });
+                
+                // Set up video element
+                video.srcObject = stream;
+                video.style.display = 'block';
+                cameraPlaceholder.style.display = 'none';
+                scanArea.style.display = 'block';
+                
+                // Show scanning UI
+                scanning = true;
+                scanLoading.style.display = 'block';
+                scanError.style.display = 'none';
+                scanSuccess.style.display = 'none';
+                startScanBtn.disabled = true;
+                stopScanBtn.disabled = false;
+                
+                // Start scanning for QR codes
+                scanInterval = setInterval(scanQRCode, 1000);
+                
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                showError(scanError, 'Cannot access camera. Please make sure you have granted camera permissions.');
+            }
+        }
+
+        function stopScanning() {
+            scanning = false;
+            
+            // Stop the video stream
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            
+            // Reset UI
+            video.style.display = 'none';
+            cameraPlaceholder.style.display = 'flex';
+            scanArea.style.display = 'none';
+            scanLoading.style.display = 'none';
+            startScanBtn.disabled = false;
+            stopScanBtn.disabled = true;
+            
+            // Clear scanning interval
+            if (scanInterval) {
+                clearInterval(scanInterval);
+                scanInterval = null;
+            }
+        }
+
+      async function scanQRCode() {
+    if (!scanning) return;
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+    const code = jsQR(imgData.data, canvas.width, canvas.height);
+
+    if (code) {
+        scanResult.textContent = code.data;
+        scanSuccess.textContent = "QR code detected!";
+        scanSuccess.style.display = "block";
+        copyResultBtn.disabled = false;
+        stopScanning();
+    }
+}
+
+video.onloadedmetadata = () => {
+    video.play();
+};
+
+
+
+
+        function copyResult() {
+            const resultText = scanResult.textContent;
+            if (resultText && resultText !== 'Scan result will appear here') {
+                navigator.clipboard.writeText(resultText)
+                    .then(() => {
+                        scanSuccess.textContent = 'Result copied to clipboard!';
+                        scanSuccess.style.display = 'block';
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy text: ', err);
+                        showError(scanError, 'Failed to copy result to clipboard');
+                    });
+            }
+        }
+
+        // Utility Functions
+        function showError(element, message) {
+            element.textContent = message;
+            element.style.display = 'block';
+        }
+
+        // Initialize the app
+        function init() {
+            // Check if the browser supports the required APIs
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showError(scanError, 'Your browser does not support camera access. Please try a modern browser like Chrome or Firefox.');
+                startScanBtn.disabled = true;
+            }
+            
+            // Generate a QR code on page load with example content
+            generateQRCode();
+        }
+
+        // Start the application
+        init();
+
+
+
+
+        const qrImageInput = document.getElementById("qrImageInput");
+const uploadBtn = document.getElementById("uploadBtn");
+
+uploadBtn.addEventListener("click", () => {
+    qrImageInput.click();
+});
+
+qrImageInput.addEventListener("change", function () {
+    const file = this.files[0];
+    if (!file) return;
+
+    const img = new Image();
+    img.src = URL.createObjectURL(file);
+
+    img.onload = function () {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        ctx.drawImage(img, 0, 0);
+
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+        const code = jsQR(imgData.data, canvas.width, canvas.height);
+
+        if (code) {
+            scanResult.textContent = code.data;
+            scanSuccess.textContent = "QR code scanned from image!";
+            scanSuccess.style.display = "block";
+            copyResultBtn.disabled = false;
+        } else {
+            scanSuccess.style.display = "block";
+            scanSuccess.textContent = "No QR code found in the image.";
+        }
+    };
+});
+
+// const qrContent = document.getElementById("qrContent");
+// const qrSize = document.getElementById("qrSize");
+// const generateBtn = document.getElementById("generateBtn");
+// const downloadBtn = document.getElementById("downloadBtn");
+// const clearBtn = document.getElementById("clearBtn");
+
+// const qrCodeImage = document.getElementById("qrCodeImage");
+// const placeholderText = document.getElementById("placeholderText");
+const loading = document.getElementById("generateLoading");
+const error = document.getElementById("generateError");
+
+let lastQRUrl = ""; // store API URL
+
+
+
+
+    </script>
+</body>
+</html>

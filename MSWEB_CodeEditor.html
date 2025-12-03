@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MS CodePlayground - WEB Online Code Editor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/eclipse.min.css">
+    <style>
+        :root {
+            --primary-color: #4a6ee0;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
+            --editor-bg: #ffffff;
+            --border-color: #dee2e6;
+            --header-height: 60px;
+            --panel-min-width: 200px;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --text-color: #e9ecef;
+            --editor-bg: #2d2d2d;
+            --border-color: #495057;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: var(--header-height);
+            padding: 0 20px;
+            background-color: var(--editor-bg);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - var(--header-height));
+        }
+
+        .editor-container {
+            display: flex;
+            flex-direction: column;
+            width: 60%;
+            min-width: var(--panel-min-width);
+            border-right: 1px solid var(--border-color);
+        }
+
+        .editor-tabs {
+            display: flex;
+            background-color: var(--editor-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .editor-tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-right: 1px solid var(--border-color);
+            transition: background-color 0.2s;
+        }
+
+        .editor-tab.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .editor-panel {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .editor-wrapper {
+            height: 100%;
+            width: 100%;
+        }
+
+        .CodeMirror {
+            height: 100%;
+            font-size: 14px;
+        }
+
+        .preview-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: var(--panel-min-width);
+        }
+
+        .preview-header {
+            padding: 10px 20px;
+            background-color: var(--editor-bg);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .preview-frame {
+            flex: 1;
+            border: none;
+            background-color: white;
+        }
+
+        .resizer {
+            width: 8px;
+            background-color: var(--border-color);
+            cursor: col-resize;
+            transition: background-color 0.2s;
+        }
+
+        .resizer:hover {
+            background-color: var(--primary-color);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--editor-bg);
+            padding: 20px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .saved-snippets {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .snippet-item {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .snippet-item:hover {
+            background-color: var(--bg-color);
+        }
+
+        .snippet-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .snippet-date {
+            font-size: 0.8rem;
+            color: var(--secondary-color);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background-color: var(--success-color);
+            color: white;
+            border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: transform 0.3s, opacity 0.3s;
+            z-index: 1001;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .editor-container, .preview-container {
+                width: 100%;
+                height: 50%;
+            }
+            
+            .resizer {
+                width: 100%;
+                height: 8px;
+                cursor: row-resize;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">MS Web CodePlayground</div>
+        
+<footer style="text-align: center; padding: 10px; color: BLACK; margin-top: 20px; font-size:11px; ">
+    
+        <strong>&copy; 2025 MS Corporation — All Rights Reserved.</strong>
+    </footer>
+        <div class="controls">
+            <button class="theme-toggle" id="themeToggle">Dark Mode</button>
+            <button class="btn-secondary" id="saveBtn">Save</button>
+            <button class="btn-secondary" id="loadBtn">Load</button>
+            <button class="btn-primary" id="shareBtn">Share</button>
+            <button class="btn-success" id="runBtn">Run</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="editor-container">
+            <div class="editor-tabs">
+                <div class="editor-tab active" data-editor="html">HTML</div>
+                <div class="editor-tab" data-editor="css">CSS</div>
+                <div class="editor-tab" data-editor="js">JavaScript</div>
+            </div>
+            <div class="editor-panel">
+                <div class="editor-wrapper" id="html-editor"></div>
+                <div class="editor-wrapper" id="css-editor" style="display: none;"></div>
+                <div class="editor-wrapper" id="js-editor" style="display: none;"></div>
+            </div>
+        </div>
+        
+        <div class="resizer" id="resizer"></div>
+        
+        <div class="preview-container">
+            <div class="preview-header">
+                <h3>Output</h3>
+                <button class="btn-secondary" id="refreshBtn">Refresh</button>
+            </div>
+            <iframe class="preview-frame" id="previewFrame"></iframe>
+        </div>
+    </div>
+
+    <!-- Save Modal -->
+    <div class="modal" id="saveModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Save Code Snippet</div>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="snippetTitle">Title</label>
+                <input type="text" id="snippetTitle" placeholder="Enter snippet title">
+            </div>
+            <div class="form-group">
+                <label for="snippetDescription">Description (optional)</label>
+                <textarea id="snippetDescription" rows="3" placeholder="Enter snippet description"></textarea>
+            </div>
+            <button class="btn-primary" id="confirmSave">Save Snippet</button>
+        </div>
+    </div>
+
+    <!-- Load Modal -->
+    <div class="modal" id="loadModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Load Code Snippet</div>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="saved-snippets" id="savedSnippets">
+                <!-- Saved snippets will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script>
+        // State management
+        let currentEditor = 'html';
+        let editors = {};
+
+        // DOM Elements
+        const editorTabs = document.querySelectorAll('.editor-tab');
+        const editorWrappers = {
+            html: document.getElementById('html-editor'),
+            css: document.getElementById('css-editor'),
+            js: document.getElementById('js-editor')
+        };
+        const previewFrame = document.getElementById('previewFrame');
+        const themeToggle = document.getElementById('themeToggle');
+        const saveBtn = document.getElementById('saveBtn');
+        const loadBtn = document.getElementById('loadBtn');
+        const shareBtn = document.getElementById('shareBtn');
+        const runBtn = document.getElementById('runBtn');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const saveModal = document.getElementById('saveModal');
+        const loadModal = document.getElementById('loadModal');
+        const closeModals = document.querySelectorAll('.close-modal');
+        const confirmSave = document.getElementById('confirmSave');
+        const savedSnippets = document.getElementById('savedSnippets');
+        const toast = document.getElementById('toast');
+        const resizer = document.getElementById('resizer');
+
+        // Initialize CodeMirror editors
+        function initializeEditors() {
+            editors.html = CodeMirror(editorWrappers.html, {
+                mode: 'xml',
+                theme: 'eclipse',
+                lineNumbers: true,
+                autoCloseTags: true,
+                value: `<!DOCTYPE html>
+<html>
+<head>
+    <title>My Page</title>
+</head>
+<body>
+    <h1>Hello, CodePlayground!</h1>
+    <p>Start editing to see some magic happen.</p>
+</body>
+</html>`
+            });
+
+            editors.css = CodeMirror(editorWrappers.css, {
+                mode: 'css',
+                theme: 'eclipse',
+                lineNumbers: true,
+                value: `body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 50px;
+    background-color: #f0f0f0;
+}
+
+h1 {
+    color: #4a6ee0;
+}`
+            });
+
+            editors.js = CodeMirror(editorWrappers.js, {
+                mode: 'javascript',
+                theme: 'eclipse',
+                lineNumbers: true,
+                value: `// JavaScript code here
+document.querySelector('h1').addEventListener('click', function() {
+    this.style.color = this.style.color === 'red' ? '#4a6ee0' : 'red';
+});`
+            });
+
+            // Set up change listeners for auto-refresh (optional)
+            Object.values(editors).forEach(editor => {
+                editor.on('change', () => {
+                    // Auto-refresh can be enabled here if desired
+                    // updatePreview();
+                });
+            });
+        }
+
+        // Initialize
+        function init() {
+            // Initialize editors first
+            initializeEditors();
+            
+            // Set initial theme
+            const savedTheme = localStorage.getItem('codeEditorTheme') || 'light';
+            setTheme(savedTheme);
+            
+            // Load any saved snippets
+            loadSnippetsList();
+            
+            // Run initial code
+            updatePreview();
+            
+            // Set up event listeners
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            // Editor tabs
+            editorTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const editorType = tab.getAttribute('data-editor');
+                    switchEditor(editorType);
+                });
+            });
+
+            // Theme toggle
+            themeToggle.addEventListener('click', toggleTheme);
+
+            // Buttons
+            saveBtn.addEventListener('click', () => saveModal.style.display = 'flex');
+            loadBtn.addEventListener('click', () => {
+                loadSnippetsList();
+                loadModal.style.display = 'flex';
+            });
+            shareBtn.addEventListener('click', shareCode);
+            runBtn.addEventListener('click', updatePreview);
+            refreshBtn.addEventListener('click', updatePreview);
+
+            // Modal close buttons
+            closeModals.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    saveModal.style.display = 'none';
+                    loadModal.style.display = 'none';
+                });
+            });
+
+            // Save confirmation
+            confirmSave.addEventListener('click', saveSnippet);
+
+            // Resizer for panels
+            setupResizer();
+
+            // Close modals when clicking outside
+            window.addEventListener('click', (e) => {
+                if (e.target === saveModal) saveModal.style.display = 'none';
+                if (e.target === loadModal) loadModal.style.display = 'none';
+            });
+        }
+
+        function switchEditor(editorType) {
+            // Update active tab
+            editorTabs.forEach(tab => {
+                if (tab.getAttribute('data-editor') === editorType) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+
+            // Update editor visibility
+            Object.keys(editorWrappers).forEach(key => {
+                editorWrappers[key].style.display = key === editorType ? 'block' : 'none';
+            });
+
+            // Update current editor and refresh
+            currentEditor = editorType;
+            editors[editorType].refresh();
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.body.getAttribute('data-theme') || 'light';
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            setTheme(newTheme);
+        }
+
+        function setTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            const isDark = theme === 'dark';
+            themeToggle.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+            
+            // Update CodeMirror themes
+            Object.values(editors).forEach(editor => {
+                editor.setOption('theme', isDark ? 'dracula' : 'eclipse');
+            });
+            
+            localStorage.setItem('codeEditorTheme', theme);
+        }
+
+        function updatePreview() {
+            const htmlCode = editors.html.getValue();
+            const cssCode = editors.css.getValue();
+            const jsCode = editors.js.getValue();
+            
+            const previewDoc = previewFrame.contentDocument || previewFrame.contentWindow.document;
+            
+            previewDoc.open();
+            previewDoc.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <style>${cssCode}</style>
+                </head>
+                <body>
+                    ${htmlCode}
+                    <script>${jsCode}<\/script>
+                </body>
+                </html>
+            `);
+            previewDoc.close();
+        }
+
+        function saveSnippet() {
+            const title = document.getElementById('snippetTitle').value.trim();
+            const description = document.getElementById('snippetDescription').value.trim();
+            
+            if (!title) {
+                showToast('Please enter a title for your snippet');
+                return;
+            }
+            
+            const snippet = {
+                title,
+                description,
+                html: editors.html.getValue(),
+                css: editors.css.getValue(),
+                js: editors.js.getValue(),
+                timestamp: new Date().toISOString()
+            };
+            
+            // Get existing snippets
+            const snippets = JSON.parse(localStorage.getItem('codeSnippets') || '[]');
+            
+            // Add new snippet
+            snippets.push(snippet);
+            
+            // Save back to localStorage
+            localStorage.setItem('codeSnippets', JSON.stringify(snippets));
+            
+            // Close modal and reset form
+            saveModal.style.display = 'none';
+            document.getElementById('snippetTitle').value = '';
+            document.getElementById('snippetDescription').value = '';
+            
+            showToast('Snippet saved successfully!');
+        }
+
+        function loadSnippetsList() {
+            const snippets = JSON.parse(localStorage.getItem('codeSnippets') || '[]');
+            
+            if (snippets.length === 0) {
+                savedSnippets.innerHTML = '<p>No saved snippets found.</p>';
+                return;
+            }
+            
+            savedSnippets.innerHTML = snippets.map((snippet, index) => `
+                <div class="snippet-item" data-index="${index}">
+                    <div class="snippet-title">${snippet.title}</div>
+                    <div class="snippet-description">${snippet.description || 'No description'}</div>
+                    <div class="snippet-date">${new Date(snippet.timestamp).toLocaleDateString()}</div>
+                </div>
+            `).join('');
+            
+            // Add click listeners to snippet items
+            document.querySelectorAll('.snippet-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const index = parseInt(item.getAttribute('data-index'));
+                    loadSnippet(index);
+                    loadModal.style.display = 'none';
+                });
+            });
+        }
+
+        function loadSnippet(index) {
+            const snippets = JSON.parse(localStorage.getItem('codeSnippets') || '[]');
+            const snippet = snippets[index];
+            
+            if (snippet) {
+                editors.html.setValue(snippet.html);
+                editors.css.setValue(snippet.css);
+                editors.js.setValue(snippet.js);
+                updatePreview();
+                showToast('Snippet loaded successfully!');
+            }
+        }
+
+        function shareCode() {
+            const codeData = {
+                html: editors.html.getValue(),
+                css: editors.css.getValue(),
+                js: editors.js.getValue()
+            };
+            
+            const shareText = `Check out my code on CodePlayground!\n\nHTML:\n${codeData.html}\n\nCSS:\n${codeData.css}\n\nJavaScript:\n${codeData.js}`;
+            
+            navigator.clipboard.writeText(shareText).then(() => {
+                showToast('Code copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = shareText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                showToast('Code copied to clipboard!');
+            });
+        }
+
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function setupResizer() {
+            let isResizing = false;
+            
+            resizer.addEventListener('mousedown', function(e) {
+                isResizing = true;
+                document.addEventListener('mousemove', handleMouseMove);
+                document.addEventListener('mouseup', () => {
+                    isResizing = false;
+                    document.removeEventListener('mousemove', handleMouseMove);
+                });
+            });
+            
+            function handleMouseMove(e) {
+                if (!isResizing) return;
+                
+                const container = document.querySelector('.container');
+                const containerRect = container.getBoundingClientRect();
+                const editorContainer = document.querySelector('.editor-container');
+                
+                // Calculate new width for editor container
+                const newWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+                
+                // Apply constraints
+                if (newWidth >= 20 && newWidth <= 80) {
+                    editorContainer.style.width = `${newWidth}%`;
+                }
+            }
+        }
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

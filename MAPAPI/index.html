@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Leaflet Map – India Wide</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f3f4f6;
+    }
+
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+
+    /* Top UI Panel */
+    .top-bar {
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 10px 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      backdrop-filter: blur(6px);
+    }
+
+    .top-bar select, .top-bar button {
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      font-size: 14px;
+    }
+
+    .top-bar button {
+      background: #2563eb;
+      color: #fff;
+      cursor: pointer;
+      border: none;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 600px) {
+      .top-bar {
+        width: 90%;
+        left: 50%;
+        transform: translateX(-50%);
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      .top-bar select, .top-bar button {
+        flex: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- UI BAR -->
+  <div class="top-bar">
+    <select id="themeSwitcher">
+      <option value="light">Light Map</option>
+      <option value="dark">Dark Map</option>
+    </select>
+
+    <button id="myLocationBtn">📍 My Location</button>
+  </div>
+
+  <!-- MAP -->
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+
+  <script>
+    // India-wide view
+    var map = L.map('map').setView([22.9734, 78.6569], 5);
+
+    // Light layer
+    var lightLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+    });
+
+    // Dark layer
+    var darkLayer = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}.png', {
+      maxZoom: 20,
+    });
+
+    // Add default layer
+    lightLayer.addTo(map);
+
+    // Theme switcher
+    document.getElementById("themeSwitcher").onchange = function () {
+      if (this.value === "dark") {
+        map.removeLayer(lightLayer);
+        map.addLayer(darkLayer);
+      } else {
+        map.removeLayer(darkLayer);
+        map.addLayer(lightLayer);
+      }
+    };
+
+    // My Location Button
+    document.getElementById("myLocationBtn").onclick = function () {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (pos) {
+          var lat = pos.coords.latitude;
+          var lng = pos.coords.longitude;
+
+          map.setView([lat, lng], 14);
+
+          L.marker([lat, lng])
+            .addTo(map)
+            .bindPopup("You are here 📍")
+            .openPopup();
+        });
+      } else {
+        alert("Geolocation is not supported by your browser.");
+      }
+    };
+
+    // Add smooth zoom animation
+    map.zoomAnimation = true;
+    map.attributionControl.setPrefix('');
+map.attributionControl.addAttribution("© 2025 MS Corporation");
+
+  </script>
+
+</body>
+</html>

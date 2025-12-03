@@ -1,0 +1,702 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ChefSpark — Cooking Ideas</title>
+  <style>
+    /* ---------- Reset & base ---------- */
+    :root{
+      --bg:#fbfbfd; --card:#ffffffcc; --glass: rgba(255,255,255,0.6);
+      --muted:#6b7280; --accent:#ff6b35; --accent-2:#ffb78a; --shadow: 0 8px 24px rgba(15,23,42,0.08);
+      --radius:18px; --glass-border: rgba(255,255,255,0.55);
+      --glass-blur: 10px;
+      --veg-color: #22c55e;
+      --nonveg-color: #ef4444;
+    }
+    *{box-sizing:border-box}
+    html,body,#app{height:100%}
+    body{
+      margin:0;font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      background: radial-gradient(1200px 700px at 10% 10%, rgba(255,214,180,0.08), transparent 10%),
+                  linear-gradient(180deg,#fff 0%, #fbfbfd 100%);
+      color:#0f172a;
+      -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;
+      padding:28px;
+    }
+
+    .container{max-width:1100px;margin:0 auto}
+
+    /* ---------- Header ---------- */
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .logo{
+      width:56px;height:56px;border-radius:12px;display:grid;place-items:center;
+      background: linear-gradient(135deg,var(--accent),var(--accent-2));color:white;font-weight:700;font-size:22px;box-shadow:var(--shadow)
+    }
+    h1{margin:0;font-size:20px}
+    p.lead{margin:0;color:var(--muted);font-size:13px}
+
+    /* ---------- Search card (glass) ---------- */
+    .search-card{display:flex;gap:16px;padding:16px;border-radius:var(--radius);background:var(--card);backdrop-filter: blur(var(--glass-blur));border:1px solid var(--glass-border);box-shadow:var(--shadow);align-items:flex-start}
+    .left{flex:1}
+    input#ingredients{width:100%;padding:12px 14px;border-radius:12px;border:1px solid #eef2f7;font-size:15px;margin-bottom:8px}
+    .controls{display:flex;gap:12px;flex-direction:column;width:220px}
+    .filters{display:flex;flex-direction:column;gap:8px}
+    .filter-group{display:flex;gap:6px}
+    .filter-btn{padding:6px 10px;border-radius:8px;border:1px solid #e2e8f0;background:white;cursor:pointer;font-size:12px;flex:1}
+    .filter-btn.active{background:var(--accent);color:white;border-color:var(--accent)}
+    .veg-btn.active{background:var(--veg-color);color:white;border-color:var(--veg-color)}
+    .nonveg-btn.active{background:var(--nonveg-color);color:white;border-color:var(--nonveg-color)}
+    select, button.search-btn{padding:10px;border-radius:10px;border:0;font-weight:600}
+    .moods{display:flex;gap:8px;flex-wrap:wrap}
+    .chip{padding:8px 10px;border-radius:999px;background:transparent;border:1px solid #eee;font-size:13px;color:var(--muted);cursor:pointer}
+    .chip.active{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;border:0}
+    .search-btn{background:linear-gradient(90deg,var(--accent),#ff8f5b);color:white;cursor:pointer;box-shadow:0 6px 18px rgba(255,107,53,0.18)}
+
+    /* ---------- Results grid ---------- */
+    .meta{display:flex;justify-content:space-between;align-items:center;margin:18px 0}
+    .grid{display:grid;grid-template-columns:repeat(1,1fr);gap:14px}
+    @media(min-width:640px){.grid{grid-template-columns:repeat(2,1fr)}}
+    @media(min-width:980px){.grid{grid-template-columns:repeat(3,1fr)}}
+
+    .card{background:white;border-radius:16px;overflow:hidden;box-shadow:0 8px 30px rgba(15,23,42,0.06);display:flex;flex-direction:column;position:relative}
+    .card img{width:100%;height:170px;object-fit:cover;display:block}
+    .card-body{padding:12px;flex:1;display:flex;flex-direction:column}
+    .card h3{margin:0;font-size:15px}
+    .card .meta-row{margin-top:8px;font-size:13px;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+    .card .actions{display:flex;gap:8px;margin-top:10px}
+    .btn{padding:8px 10px;border-radius:10px;border:0;cursor:pointer}
+    .btn-outline{background:#fff;border:1px solid #eee}
+    .fav{background:linear-gradient(90deg,#ffd6a8,#fff3e0);border-radius:10px;padding:6px 8px}
+    .veg-tag{position:absolute;top:12px;right:12px;background:var(--veg-color);color:white;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600}
+    .nonveg-tag{position:absolute;top:12px;right:12px;background:var(--nonveg-color);color:white;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600}
+
+    /* ---------- Empty / loading ---------- */
+    .empty{padding:40px;text-align:center;color:var(--muted);border-radius:12px;border:1px dashed #eee}
+    .loading{display:inline-block;width:20px;height:20px;border:2px solid #f3f3f3;border-top:2px solid var(--accent);border-radius:50%;animation:spin 1s linear infinite}
+    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+
+    /* ---------- Modal ---------- */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(6,8,12,0.4);display:grid;place-items:center;padding:20px;z-index:1000}
+    .modal{width:100%;max-width:980px;background:white;border-radius:16px;overflow:auto;max-height:92vh}
+    .modal .header{display:flex;justify-content:space-between;align-items:center;padding:14px;border-bottom:1px solid #f3f4f6}
+    .modal .content{display:grid;grid-template-columns:1fr 320px;gap:24px;padding:24px}
+    @media(max-width:900px){.modal .content{grid-template-columns:1fr}}
+    .ingredient-list{list-style:disc;padding-left:18px}
+    .close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}
+
+    /* ---------- Favorites strip ---------- */
+    .favs{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .fav-card{display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:12px;background:linear-gradient(90deg,#fff7f3, #fff);border:1px solid #fff1ea}
+
+    /* ---------- small helpers ---------- */
+    .muted{color:var(--muted)}
+    .small{font-size:13px}
+    .pill{display:inline-block;padding:6px 8px;border-radius:10px;background:#fff7f5;border:1px solid #ffe7dc;font-size:13px}
+    .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+    .ingredient-match{display:inline-block;padding:2px 6px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:4px;font-size:12px;margin:2px}
+    .matched-ingredients{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+  </style>
+</head>
+<body>
+  <div class="container" id="app">
+    <header>
+      <div class="brand">
+        <div class="logo">CS</div>
+        <div>
+          <h1>ChefSpark</h1>
+          <p class="lead">Paste ingredients or type them — find what to cook right now.</p>
+        </div>
+      </div>
+      <div class="muted small">Using TheMealDB • Free API</div>
+    </header>
+
+    <section class="search-card">
+      <div class="left">
+        <label class="small muted">Ingredients (comma separated)</label>
+        <input id="ingredients" placeholder="e.g. onion, capsicum, tomato, cheese  —  Ctrl+V works" autocomplete="off" />
+        <div class="small muted" style="margin-top:8px">
+          Tip: We'll search for each ingredient separately and show matching recipes.
+          <br>
+          <span id="ingredientStatus" class="muted"></span>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="filters">
+          <label class="small muted">Diet Type</label>
+          <div class="filter-group">
+            <button class="filter-btn active" data-type="all">All</button>
+            <button class="filter-btn veg-btn" data-type="veg">Vegetarian</button>
+            <button class="filter-btn nonveg-btn" data-type="nonveg">Non-Veg</button>
+          </div>
+        </div>
+        
+        <div class="moods" id="moodChips">
+          <button class="chip active" data-mood="any">Any</button>
+          <button class="chip" data-mood="quick">Quick</button>
+          <button class="chip" data-mood="healthy">Healthy</button>
+          <button class="chip" data-mood="comfort">Comfort</button>
+        </div>
+        <button class="search-btn" id="searchBtn">Search Recipes</button>
+      </div>
+    </section>
+
+    <div class="meta">
+      <div class="small muted" id="resultsInfo">No search yet</div>
+      <div>
+        <button class="btn btn-outline" id="clearFavs">Clear favorites</button>
+      </div>
+    </div>
+
+    <main>
+      <div id="grid" class="grid"></div>
+      <div id="empty" class="empty" style="display:none">
+        <p>No recipes found with those ingredients.</p>
+        <p class="small muted">Try common ingredients like: chicken, beef, potato, tomato, rice, cheese, eggs</p>
+      </div>
+
+      <section style="margin-top:20px">
+        <h3 style="margin:0 0 8px 0">Favorites</h3>
+        <div id="favs" class="favs"></div>
+      </section>
+    </main>
+  </div>
+<footer style="text-align: center; padding: 10px; color: BLACK; margin-top: 20px; font-size:11px; ">
+    
+        <strong>&copy; 2025 MS Corporation — All Rights Reserved.</strong>
+    </footer>
+  <script>
+    // State
+    let favorites = JSON.parse(localStorage.getItem('chefspark-favs') || '[]');
+    let currentMeals = [];
+    let mealDetailsCache = {}; // Cache for meal details
+    let currentFilters = {
+      diet: 'all',
+      mood: 'any'
+    };
+
+    // Improved non-veg detection
+    const nonVegIngredients = [
+      // Meats
+      'chicken', 'beef', 'pork', 'lamb', 'mutton', 'goat', 'veal',
+      // Processed meats
+      'bacon', 'sausage', 'ham', 'pepperoni', 'salami', 'prosciutto',
+      // Poultry
+      'turkey', 'duck', 'goose', 'quail', 'pheasant',
+      // Fish
+      'fish', 'salmon', 'tuna', 'cod', 'haddock', 'trout', 'sardine', 'mackerel', 'anchovy',
+      // Seafood
+      'shrimp', 'prawn', 'crab', 'lobster', 'oyster', 'mussel', 'clam', 'scallop', 'squid', 'octopus', 'eel',
+      // Eggs (sometimes considered vegetarian, sometimes not)
+      'egg', 'eggs',
+      // Broths and stocks
+      'chicken broth', 'beef broth', 'fish stock', 'meat stock',
+      // Gelatin
+      'gelatin', 'gelatine'
+    ];
+
+    // False positives - vegetarian dishes that might contain these words
+    const vegetarianFalsePositives = [
+      'chicken of the sea', // Sometimes used for tuna
+      'mock chicken', // Vegetarian alternative
+      'vegetable chicken', // Vegetarian dish
+      'chicken mushroom', // Could be vegetarian
+      'chicken pea', // Chickpea
+    ];
+
+    // DOM Elements
+    const ingredientsInput = document.getElementById('ingredients');
+    const searchBtn = document.getElementById('searchBtn');
+    const grid = document.getElementById('grid');
+    const empty = document.getElementById('empty');
+    const resultsInfo = document.getElementById('resultsInfo');
+    const favsContainer = document.getElementById('favs');
+    const clearFavsBtn = document.getElementById('clearFavs');
+    const moodChips = document.getElementById('moodChips');
+    const ingredientStatus = document.getElementById('ingredientStatus');
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      updateFavoritesDisplay();
+      setupEventListeners();
+      
+      // Handle paste event
+      ingredientsInput.addEventListener('paste', (e) => {
+        setTimeout(() => {
+          let value = ingredientsInput.value;
+          value = value.replace(/\n/g, ',')
+                      .replace(/,+/g, ',')
+                      .replace(/\s*,\s*/g, ', ')
+                      .trim();
+          value = value.replace(/,\s*$/, '');
+          ingredientsInput.value = value;
+          updateIngredientCount();
+        }, 10);
+      });
+
+      ingredientsInput.addEventListener('input', updateIngredientCount);
+      updateIngredientCount();
+    });
+
+    function updateIngredientCount() {
+      const ingredients = ingredientsInput.value.split(',').filter(i => i.trim()).length;
+      ingredientStatus.textContent = `${ingredients} ingredient${ingredients !== 1 ? 's' : ''} entered`;
+    }
+
+    function setupEventListeners() {
+      searchBtn.addEventListener('click', searchRecipes);
+      clearFavsBtn.addEventListener('click', clearFavorites);
+      
+      // Diet filter buttons
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+          e.target.classList.add('active');
+          currentFilters.diet = e.target.dataset.type;
+          filterAndDisplayMeals();
+        });
+      });
+      
+      // Mood chips
+      moodChips.addEventListener('click', (e) => {
+        if (e.target.classList.contains('chip')) {
+          document.querySelectorAll('.chip').forEach(chip => chip.classList.remove('active'));
+          e.target.classList.add('active');
+          currentFilters.mood = e.target.dataset.mood;
+          filterAndDisplayMeals();
+        }
+      });
+      
+      // Enter key in input
+      ingredientsInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') searchRecipes();
+      });
+    }
+
+    async function searchRecipes() {
+      let ingredients = ingredientsInput.value.trim();
+      if (!ingredients) {
+        alert('Please enter some ingredients');
+        return;
+      }
+
+      const ingredientList = ingredients.split(',')
+        .map(i => i.trim().toLowerCase())
+        .filter(i => i.length > 0);
+
+      searchBtn.innerHTML = '<div class="loading"></div> Searching...';
+      searchBtn.disabled = true;
+      grid.innerHTML = '<div class="empty"><div class="loading"></div> Searching for recipes...</div>';
+
+      try {
+        let allMeals = [];
+        let foundMeals = new Set();
+        
+        for (const ingredient of ingredientList) {
+          try {
+            const url = `https://www.themealdb.com/api/json/v1/1/filter.php?i=${encodeURIComponent(ingredient)}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            
+            if (data.meals) {
+              // We need to check each meal's actual ingredients for proper classification
+              for (const meal of data.meals) {
+                if (!foundMeals.has(meal.idMeal)) {
+                  foundMeals.add(meal.idMeal);
+                  meal.matchedIngredients = meal.matchedIngredients || [];
+                  if (!meal.matchedIngredients.includes(ingredient)) {
+                    meal.matchedIngredients.push(ingredient);
+                  }
+                  
+                  // Fetch meal details to check actual ingredients
+                  try {
+                    const details = await fetchMealDetails(meal.idMeal);
+                    meal.isNonVeg = await checkIfMealIsNonVeg(details);
+                    meal.category = details.strCategory;
+                  } catch (e) {
+                    // If we can't fetch details, use name-based detection as fallback
+                    meal.isNonVeg = isNonVegByNameOnly(meal.strMeal);
+                  }
+                  
+                  allMeals.push(meal);
+                } else {
+                  const existingMeal = allMeals.find(m => m.idMeal === meal.idMeal);
+                  if (existingMeal && !existingMeal.matchedIngredients.includes(ingredient)) {
+                    existingMeal.matchedIngredients.push(ingredient);
+                  }
+                }
+              }
+            }
+          } catch (error) {
+            console.log(`No recipes found for: ${ingredient}`);
+          }
+          
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+
+        currentMeals = allMeals;
+
+        if (!currentMeals.length) {
+          empty.style.display = 'block';
+          resultsInfo.textContent = `No recipes found with: ${ingredientList.join(', ')}`;
+          grid.innerHTML = '';
+        } else {
+          empty.style.display = 'none';
+          resultsInfo.textContent = `Found ${currentMeals.length} recipes matching your ingredients`;
+          filterAndDisplayMeals();
+        }
+      } catch (error) {
+        console.error('Search error:', error);
+        resultsInfo.textContent = 'Error searching recipes. Please try again.';
+        grid.innerHTML = '';
+      } finally {
+        searchBtn.innerHTML = 'Search Recipes';
+        searchBtn.disabled = false;
+      }
+    }
+
+    async function fetchMealDetails(mealId) {
+      // Check cache first
+      if (mealDetailsCache[mealId]) {
+        return mealDetailsCache[mealId];
+      }
+      
+      try {
+        const res = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${mealId}`);
+        const data = await res.json();
+        if (data.meals && data.meals[0]) {
+          mealDetailsCache[mealId] = data.meals[0];
+          return data.meals[0];
+        }
+      } catch (error) {
+        console.error('Error fetching meal details:', error);
+      }
+      return null;
+    }
+
+    async function checkIfMealIsNonVeg(meal) {
+      if (!meal) return false;
+      
+      // Check meal name for false positives first
+      const mealName = meal.strMeal.toLowerCase();
+      for (const fp of vegetarianFalsePositives) {
+        if (mealName.includes(fp.toLowerCase())) {
+          return false; // It's probably vegetarian
+        }
+      }
+      
+      // Check ALL ingredients (not just name)
+      for (let i = 1; i <= 20; i++) {
+        const ingredient = meal[`strIngredient${i}`];
+        if (ingredient && ingredient.trim()) {
+          const ingLower = ingredient.toLowerCase();
+          
+          // Check if this ingredient is non-veg
+          for (const nonVeg of nonVegIngredients) {
+            if (ingLower.includes(nonVeg.toLowerCase())) {
+              return true; // Found non-veg ingredient
+            }
+          }
+        }
+      }
+      
+      return false;
+    }
+
+    function isNonVegByNameOnly(mealName) {
+      const nameLower = mealName.toLowerCase();
+      
+      // Check for false positives first
+      for (const fp of vegetarianFalsePositives) {
+        if (nameLower.includes(fp.toLowerCase())) {
+          return false;
+        }
+      }
+      
+      // Then check for non-veg terms
+      return nonVegIngredients.some(ing => nameLower.includes(ing.toLowerCase()));
+    }
+
+    function filterAndDisplayMeals() {
+      if (!currentMeals.length) return;
+
+      let filteredMeals = [...currentMeals];
+
+      // Apply diet filter
+      if (currentFilters.diet === 'veg') {
+        filteredMeals = filteredMeals.filter(meal => !meal.isNonVeg);
+      } else if (currentFilters.diet === 'nonveg') {
+        filteredMeals = filteredMeals.filter(meal => meal.isNonVeg);
+      }
+
+      // Apply mood filter
+      if (currentFilters.mood === 'quick') {
+        filteredMeals = filteredMeals.filter(meal => 
+          meal.strMeal.toLowerCase().includes('quick') || 
+          meal.strMeal.toLowerCase().includes('easy') ||
+          meal.strMeal.toLowerCase().includes('fast')
+        );
+      } else if (currentFilters.mood === 'healthy') {
+        filteredMeals = filteredMeals.filter(meal => 
+          meal.strMeal.toLowerCase().includes('salad') || 
+          meal.strMeal.toLowerCase().includes('healthy') ||
+          meal.strMeal.toLowerCase().includes('grilled') ||
+          meal.strMeal.toLowerCase().includes('steamed')
+        );
+      } else if (currentFilters.mood === 'comfort') {
+        filteredMeals = filteredMeals.filter(meal => 
+          meal.strMeal.toLowerCase().includes('pie') || 
+          meal.strMeal.toLowerCase().includes('stew') ||
+          meal.strMeal.toLowerCase().includes('cake') ||
+          meal.strMeal.toLowerCase().includes('soup')
+        );
+      }
+
+      displayMeals(filteredMeals);
+    }
+
+    function displayMeals(meals) {
+      grid.innerHTML = '';
+      
+      if (!meals.length) {
+        grid.innerHTML = '<div class="empty">No recipes match the current filters.</div>';
+        return;
+      }
+
+      meals.forEach(meal => {
+        const card = createMealCard(meal);
+        grid.appendChild(card);
+      });
+    }
+
+    function createMealCard(meal) {
+      const div = document.createElement('div');
+      div.className = 'card';
+      const isFav = favorites.includes(meal.idMeal);
+      
+      // Determine if non-veg (use cached result if available)
+      const isNonVeg = meal.isNonVeg || false;
+      
+      div.innerHTML = `
+        <img src="${meal.strMealThumb}/preview" alt="${meal.strMeal}" loading="lazy" />
+        ${isNonVeg ? '<div class="nonveg-tag">Non-Veg</div>' : '<div class="veg-tag">Vegetarian</div>'}
+        <div class="card-body">
+          <h3>${meal.strMeal}</h3>
+          <div class="meta-row">
+            <span class="small muted">Matches: ${meal.matchedIngredients?.length || 1} ingredient(s)</span>
+            <span class="pill">${meal.category || 'Recipe'}</span>
+          </div>
+          ${meal.matchedIngredients && meal.matchedIngredients.length > 0 ? `
+            <div class="matched-ingredients">
+              ${meal.matchedIngredients.map(ing => `<span class="ingredient-match">${ing}</span>`).join('')}
+            </div>
+          ` : ''}
+          <div class="actions">
+            <button class="btn" onclick="showDetails('${meal.idMeal}')">View Recipe</button>
+            <button class="btn btn-outline fav-btn" data-id="${meal.idMeal}" onclick="toggleFavorite('${meal.idMeal}')">
+              ${isFav ? '❤️ Remove' : '🤍 Favorite'}
+            </button>
+          </div>
+        </div>
+      `;
+      
+      return div;
+    }
+
+    async function showDetails(mealId) {
+      try {
+        const meal = await fetchMealDetails(mealId);
+        if (!meal) return;
+        
+        // Check if meal is actually non-veg by examining ingredients
+        const isNonVeg = await checkIfMealIsNonVeg(meal);
+        
+        // Build ingredients list with better detection
+        let ingredientsHtml = '';
+        let hasNonVegIngredient = false;
+        
+        for (let i = 1; i <= 20; i++) {
+          const ing = meal[`strIngredient${i}`];
+          const measure = meal[`strMeasure${i}`];
+          if (ing && ing.trim()) {
+            const ingLower = ing.toLowerCase();
+            let isIngNonVeg = false;
+            
+            // Check if this specific ingredient is non-veg
+            for (const nonVeg of nonVegIngredients) {
+              if (ingLower.includes(nonVeg.toLowerCase())) {
+                // Check for false positives
+                let isFalsePositive = false;
+                for (const fp of vegetarianFalsePositives) {
+                  if (ingLower.includes(fp.toLowerCase()) || meal.strMeal.toLowerCase().includes(fp.toLowerCase())) {
+                    isFalsePositive = true;
+                    break;
+                  }
+                }
+                if (!isFalsePositive) {
+                  isIngNonVeg = true;
+                  hasNonVegIngredient = true;
+                }
+                break;
+              }
+            }
+            
+            ingredientsHtml += `<li>
+              <strong>${ing}</strong> — ${measure || 'to taste'}
+              ${isIngNonVeg ? ' <span style="color:var(--nonveg-color);font-size:12px">(Non-Veg)</span>' : ''}
+            </li>`;
+          }
+        }
+        
+        // Update the meal's classification based on actual ingredients
+        if (isNonVeg !== hasNonVegIngredient) {
+          // Update cache if our detection was wrong
+          const mealIndex = currentMeals.findIndex(m => m.idMeal === mealId);
+          if (mealIndex > -1) {
+            currentMeals[mealIndex].isNonVeg = hasNonVegIngredient;
+          }
+        }
+        
+        const modalHtml = `
+          <div class="modal-backdrop" id="modalBackdrop">
+            <div class="modal">
+              <div class="header">
+                <div style="display:flex;align-items:center;gap:8px">
+                  <h2 style="margin:0">${meal.strMeal}</h2>
+                  ${hasNonVegIngredient ? '<span class="nonveg-tag" style="position:static">Non-Veg</span>' : '<span class="veg-tag" style="position:static">Vegetarian</span>'}
+                  ${hasNonVegIngredient && !isNonVeg ? '<span style="font-size:12px;color:var(--muted)">(corrected)</span>' : ''}
+                </div>
+                <button class="close-btn" onclick="closeModal()">×</button>
+              </div>
+              <div class="content">
+                <div>
+                  <img src="${meal.strMealThumb}" style="width:100%;border-radius:12px;margin-bottom:16px" />
+                  <h3>Instructions</h3>
+                  <p style="line-height:1.6;white-space:pre-line">${meal.strInstructions}</p>
+                  ${meal.strYoutube ? `<p style="margin-top:16px"><a href="${meal.strYoutube}" target="_blank" style="color:var(--accent);font-weight:600">▶ Watch Video Tutorial</a></p>` : ''}
+                </div>
+                <div>
+                  <h3>Ingredients</h3>
+                  <ul class="ingredient-list">${ingredientsHtml}</ul>
+                  
+                  ${meal.strArea ? `<p><strong>Cuisine:</strong> ${meal.strArea}</p>` : ''}
+                  ${meal.strCategory ? `<p><strong>Category:</strong> ${meal.strCategory}</p>` : ''}
+                  
+                  <div style="margin-top:16px;padding:12px;background:#f8fafc;border-radius:8px;border-left:4px solid ${hasNonVegIngredient ? 'var(--nonveg-color)' : 'var(--veg-color)'}">
+                    <p style="margin:0;font-size:13px">
+                      <strong>Diet Classification:</strong> ${hasNonVegIngredient ? 'Non-Vegetarian' : 'Vegetarian'}
+                      <br>
+                      <span class="small muted">Based on ingredient analysis</span>
+                    </p>
+                  </div>
+                  
+                  ${meal.strSource ? `<p style="margin-top:16px"><a href="${meal.strSource}" target="_blank" style="color:var(--accent)">View Original Recipe</a></p>` : ''}
+                  
+                  <div style="margin-top:24px;padding:16px;background:#f8fafc;border-radius:8px">
+                    <h4 style="margin:0 0 8px 0">Save Recipe</h4>
+                    <button class="btn" onclick="toggleFavorite('${meal.idMeal}'); updateModalFavoriteBtn('${meal.idMeal}')" id="modalFavBtn" style="width:100%">
+                      ${favorites.includes(meal.idMeal) ? '❤️ Remove from Favorites' : '🤍 Add to Favorites'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+        
+        const modalRoot = document.createElement('div');
+        modalRoot.innerHTML = modalHtml;
+        document.body.appendChild(modalRoot);
+        
+        modalRoot.querySelector('#modalBackdrop').addEventListener('click', (e) => {
+          if (e.target.id === 'modalBackdrop') closeModal();
+        });
+        
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') closeModal();
+        }, { once: true });
+      } catch (error) {
+        console.error('Details error:', error);
+        alert('Could not load recipe details');
+      }
+    }
+
+    function closeModal() {
+      const modal = document.querySelector('.modal-backdrop');
+      if (modal) modal.remove();
+    }
+
+    function updateModalFavoriteBtn(mealId) {
+      const btn = document.getElementById('modalFavBtn');
+      if (btn) {
+        btn.textContent = favorites.includes(mealId) ? '❤️ Remove from Favorites' : '🤍 Add to Favorites';
+      }
+    }
+
+    function toggleFavorite(mealId) {
+      const index = favorites.indexOf(mealId);
+      if (index > -1) {
+        favorites.splice(index, 1);
+      } else {
+        favorites.push(mealId);
+      }
+      localStorage.setItem('chefspark-favs', JSON.stringify(favorites));
+      updateFavoritesDisplay();
+      
+      document.querySelectorAll(`.fav-btn[data-id="${mealId}"]`).forEach(btn => {
+        btn.textContent = favorites.includes(mealId) ? '❤️ Remove' : '🤍 Favorite';
+      });
+    }
+
+    function updateFavoritesDisplay() {
+      favsContainer.innerHTML = '';
+      
+      if (favorites.length === 0) {
+        favsContainer.innerHTML = '<div class="small muted">No favorites yet. Click the heart icon on any recipe!</div>';
+        return;
+      }
+      
+      const displayFavs = favorites.slice(0, 5);
+      
+      displayFavs.forEach(id => {
+        const favDiv = document.createElement('div');
+        favDiv.className = 'fav-card';
+        favDiv.innerHTML = `
+          <span>⭐</span>
+          <span>Recipe ID: ${id}</span>
+          <button class="small" onclick="toggleFavorite('${id}')" style="margin-left:auto">Remove</button>
+        `;
+        favsContainer.appendChild(favDiv);
+      });
+      
+      if (favorites.length > 5) {
+        const moreDiv = document.createElement('div');
+        moreDiv.className = 'small muted';
+        moreDiv.textContent = `+ ${favorites.length - 5} more favorites`;
+        favsContainer.appendChild(moreDiv);
+      }
+    }
+
+    function clearFavorites() {
+      if (confirm('Clear all favorites?')) {
+        favorites = [];
+        localStorage.removeItem('chefspark-favs');
+        updateFavoritesDisplay();
+        
+        document.querySelectorAll('.fav-btn').forEach(btn => {
+          btn.textContent = '🤍 Favorite';
+        });
+      }
+    }
+
+    // Make functions available globally
+    window.searchRecipes = searchRecipes;
+    window.showDetails = showDetails;
+    window.closeModal = closeModal;
+    window.toggleFavorite = toggleFavorite;
+    window.updateModalFavoriteBtn = updateModalFavoriteBtn;
+  </script>
+</body>
+</html>
