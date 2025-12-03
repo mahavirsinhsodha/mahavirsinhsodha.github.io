@@ -1,0 +1,466 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Exo 2', sans-serif;
+    background: #000;
+    color: #fff;
+    overflow: hidden;
+    height: 100vh;
+    cursor: default;
+}
+
+/* ===== UI ELEMENTS ===== */
+.ui-btn {
+    position: fixed;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    backdrop-filter: blur(5px);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.ui-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.sound-btn {
+    top: 25px;
+    right: 25px;
+}
+
+/* Progress Indicator */
+.progress-container {
+    position: fixed;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 999;
+    height: 70vh;
+    display: flex;
+    align-items: center;
+}
+
+/* Update the progress-line gap to accommodate more levels */
+.progress-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px; /* Reduced from 40px to fit more levels */
+    position: relative;
+}
+
+.progress-line::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, 
+        #6a11cb, 
+        #2575fc, 
+        #00d2ff, 
+        #36d1dc, 
+        #5b86e5, 
+        #8a2387, 
+        #f27121);
+    z-index: -1;
+}
+
+.progress-dot {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: all 0.5s;
+    cursor: pointer;
+}
+
+.progress-dot.active {
+    border-color: #00d2ff;
+    box-shadow: 0 0 15px #00d2ff;
+    transform: scale(1.2);
+    background: rgba(0, 210, 255, 0.1);
+}
+
+/* Scroll Hint */
+.scroll-hint {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 998;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    animation: bounce 2s infinite;
+}
+
+.scroll-hint i {
+    font-size: 1.2rem;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(10px); }
+}
+
+/* Information Panel */
+.info-panel {
+    position: fixed;
+    bottom: 120px;
+    left: 50px;
+    max-width: 400px;
+    z-index: 997;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    border-left: 4px solid #36d1dc;
+    padding: 25px;
+    border-radius: 0 15px 15px 0;
+    transform: translateX(-100%);
+    opacity: 0;
+    transition: all 0.8s ease;
+}
+
+.info-panel.visible {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.level-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.5rem;
+    margin-bottom: 10px;
+    background: linear-gradient(to right, #36d1dc, #5b86e5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.level-description {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    color: #ccc;
+}
+
+.scale {
+    font-size: 0.9rem;
+    color: #8a2387;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 10px;
+}
+
+.scale-label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+/* ===== ZOOM CONTAINER ===== */
+.zoom-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    perspective: 1000px;
+}
+
+.zoom-level {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.5) translateZ(-1000px);
+    transition: opacity 1.5s, transform 2.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.zoom-level.active {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
+}
+
+.level-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.7);
+}
+
+/* Background images (placeholder colors) */
+#earth .level-bg { background: radial-gradient(circle, #1a2980, #26d0ce); }
+#solar-system .level-bg { background: radial-gradient(circle, #0f0c29, #302b63); }
+#milky-way .level-bg { background: radial-gradient(circle, #000428, #004e92); }
+#local-group .level-bg { background: radial-gradient(circle, #232526, #414345); }
+#laniakea .level-bg { background: radial-gradient(circle, #3a1c71, #d76d77); }
+#observable-universe .level-bg { background: radial-gradient(circle, #000000, #434343); }
+#cosmic-web .level-bg { background: radial-gradient(circle, #141e30, #243b55); }
+#multiverse .level-bg { background: radial-gradient(circle, #0f0f1a, #3a3a5d); }
+
+.level-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 800px;
+    padding: 40px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 20px;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.level-content h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+.level-content p {
+    font-size: 1.3rem;
+    line-height: 1.6;
+    color: #ddd;
+}
+
+/* 3D Earth Container */
+#earth-3d-container {
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    z-index: 3;
+    pointer-events: none;
+}
+
+/* ===== WELCOME OVERLAY ===== */
+.welcome-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, #000428, #004e92);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 1s, visibility 1s;
+}
+
+.welcome-overlay:not(.active) {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.welcome-box {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 60px;
+    border-radius: 30px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    max-width: 700px;
+    backdrop-filter: blur(15px);
+}
+
+.welcome-box h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 4rem;
+    background: linear-gradient(to right, #00d2ff, #3a7bd5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    font-size: 1.5rem;
+    color: #ccc;
+    margin-bottom: 30px;
+}
+
+.instruction {
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+    color: #aaa;
+}
+
+.cta-btn {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    border: none;
+    color: white;
+    padding: 18px 45px;
+    font-size: 1.3rem;
+    border-radius: 50px;
+    cursor: pointer;
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.cta-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(106, 17, 203, 0.7);
+}
+
+.hint {
+    margin-top: 30px;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .info-panel {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+        bottom: 100px;
+    }
+    
+    .level-title {
+        font-size: 2rem;
+    }
+    
+    .progress-container {
+        right: 15px;
+    }
+    
+    .progress-dot {
+        width: 30px;
+        height: 30px;
+        font-size: 1rem;
+    }
+    
+    .welcome-box {
+        padding: 40px 20px;
+        margin: 20px;
+    }
+    
+    .welcome-box h1 {
+        font-size: 2.5rem;
+    }
+}
+
+/* Replace these lines in your style.css */
+
+/* Background images (REAL cosmic images) */
+#earth .level-bg { 
+    background: 
+        radial-gradient(circle, rgba(0,0,0,0.3), rgba(0,0,0,0.7)),
+        url('https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80');
+    background-size: cover;
+    background-position: center;
+}
+
+#solar-system .level-bg { 
+    background: 
+        radial-gradient(circle, rgba(0,0,0,0.4), rgba(0,0,0,0.8)),
+        url('https://images.unsplash.com/photo-1446776877081-d282a0f896e2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2072&q=80');
+    background-size: cover;
+    background-position: center;
+}
+
+#milky-way .level-bg { 
+    background: 
+        radial-gradient(circle, rgba(0,0,0,0.3), rgba(0,0,0,0.8)),
+        url('https://images-assets.nasa.gov/image/hubble-captures-vivid-auroras-in-jupiters-atmosphere_28000029525_o/hubble-captures-vivid-auroras-in-jupiters-atmosphere_28000029525_o~large.jpg?w=1920&h=1080&fit=clip&crop=faces%2Cfocalpoint');
+    background-size: cover;
+    background-position: center;
+}
+
+#local-group .level-bg { 
+    background: 
+        radial-gradient(circle, rgba(0,0,0,0.4), rgba(0,0,0,0.9)),
+        url('https://images-assets.nasa.gov/image/PIA07101/PIA07101~orig.jpg?w=1920&h=1080&fit=clip&crop=faces%2Cfocalpoint');
+    background-size: cover;
+    background-position: center;
+}
+
+#laniakea .level-bg { 
+    background: 
+        radial-gradient(circle, rgba(0,0,0,0.4), rgba(0,0,0,0.9)),
+        url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Laniakea_%28transparent_background%29.png/1920px-Laniakea_%28transparent_background%29.png');
+    background-size: cover;
+    background-position: center;
+}
+
+#observable-universe .level-bg { 
+    background: 
+        radial-gradient(circle, rgba(0,0,0,0.5), rgba(0,0,0,1)),
+        url('https://images.unsplash.com/photo-1502134249126-9f3755a50d78?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+    background-size: cover;
+    background-position: center;
+}
+
+#cosmic-web .level-bg { 
+    background: 
+        radial-gradient(circle, rgba(0,0,0,0.6), rgba(0,0,0,1)),
+        url('https://images.unsplash.com/photo-1543722530-d2c3201371e7?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2074&q=80');
+    background-size: cover;
+    background-position: center;
+}
+
+#multiverse .level-bg { 
+    background: 
+        radial-gradient(circle, rgba(26, 0, 43, 0.7), rgba(0,0,0,1)),
+        url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2072&q=80');
+    background-size: cover;
+    background-position: center;
+}
+
+
+/* Add these to the background images section */
+#orion-arm .level-bg { 
+    background: 
+        radial-gradient(circle, rgba(0,0,0,0.4), rgba(0,0,0,0.8)),
+        url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2027&q=80');
+    background-size: cover;
+    background-position: center;
+}
+
+#virgo-supercluster .level-bg { 
+    background: 
+        radial-gradient(circle, rgba(0,0,0,0.5), rgba(0,0,0,0.9)),
+        url('https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Virgo_Supercluster.png/1920px-Virgo_Supercluster.png');
+    background-size: cover;
+    background-position: center;
+}
+
+#universe .level-bg { 
+    background: 
+        radial-gradient(circle, rgba(0,0,0,0.6), rgba(0,0,0,1)),
+        url('https://images.unsplash.com/photo-1502134249126-9f3755a50d78?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80');
+    background-size: cover;
+    background-position: center;
+}

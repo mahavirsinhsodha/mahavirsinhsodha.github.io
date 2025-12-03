@@ -1,0 +1,183 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Zoom — From Earth to the Multiverse</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600&family=Orbitron:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <!-- Custom Cursor Elements -->
+    <div class="custom-cursor" id="custom-cursor"></div>
+    <div class="trail-container" id="trail-container"></div>
+    
+    <!-- Sound Toggle -->
+    <button id="sound-toggle" class="ui-btn sound-btn" aria-label="Toggle sound">
+        <i class="fas fa-volume-up"></i>
+    </button>
+
+    <!-- Progress Indicator -->
+    <div class="progress-container">
+        <div class="progress-line">
+            <div class="progress-dot active" data-level="0">🌍</div>
+            <div class="progress-dot" data-level="1">⭐</div>
+            <div class="progress-dot" data-level="2">🌟</div>
+            <div class="progress-dot" data-level="3">🌌</div>
+            <div class="progress-dot" data-level="4">👥</div>
+            <div class="progress-dot" data-level="5">🌀</div>
+            <div class="progress-dot" data-level="6">🌠</div>
+            <div class="progress-dot" data-level="7">🔭</div>
+            <div class="progress-dot" data-level="8">🕸️</div>
+            <div class="progress-dot" data-level="9">✨</div>
+            <div class="progress-dot" data-level="10">♾️</div>
+        </div>
+    </div>
+
+    <!-- Scroll Hint -->
+    <div class="scroll-hint">
+        <span>Scroll to zoom out</span>
+        <i class="fas fa-chevron-down"></i>
+    </div>
+
+    <!-- Information Panel -->
+    <div class="info-panel">
+        <h1 class="level-title">Earth</h1>
+        <p class="level-description">Our home planet — a pale blue dot in the vast cosmic ocean.</p>
+        <div class="scale">
+            <span class="scale-label">Scale:</span>
+            <span class="scale-value">12,742 km diameter</span>
+        </div>
+    </div>
+
+ <!-- Main Sections (Zoom Levels) -->
+<main class="zoom-container">
+    <!-- Level 1: Earth (Closest) -->
+    <section class="zoom-level active" id="earth" data-level="0">
+        <div class="level-bg"></div>
+        <div class="level-content">
+            <h2>Planet Earth</h2>
+            <p>The third planet from the Sun, featuring liquid water, a protective magnetic field, and a stable atmosphere — making it the only known world capable of sustaining complex life.</p>
+        </div>
+    </section>
+
+    <!-- Level 2: Solar System -->
+    <section class="zoom-level" id="solar-system" data-level="1">
+        <div class="level-bg"></div>
+        <div class="level-content">
+            <h2>Solar System</h2>
+            <p>A gravitationally bound system containing the Sun, eight planets, dwarf planets, over 200 moons, asteroid belts, the Kuiper Belt, and the distant Oort Cloud which forms its outer boundary.</p>
+        </div>
+    </section>
+
+    <!-- Level 3: Orion Arm -->
+    <section class="zoom-level" id="orion-arm" data-level="2">
+        <div class="level-bg"></div>
+        <div class="level-content">
+            <h2>Orion Arm</h2>
+            <p>A minor spiral arm of the Milky Way, about 3,500 light-years wide. Our Solar System lies inside the Local Interstellar Cloud, a star-forming region within this arm.</p>
+        </div>
+    </section>
+
+    <!-- Level 4: Milky Way Galaxy -->
+    <section class="zoom-level" id="milky-way" data-level="3">
+        <div class="level-bg"></div>
+        <div class="level-content">
+            <h2>Milky Way Galaxy</h2>
+            <p>A barred spiral galaxy roughly 100,000 light-years across, containing 200–400 billion stars, nebulae, star clusters, and a supermassive black hole called Sagittarius A* at its center.</p>
+        </div>
+    </section>
+
+    <!-- Level 5: Local Group -->
+    <section class="zoom-level" id="local-group" data-level="4">
+        <div class="level-bg"></div>
+        <div class="level-content">
+            <h2>Local Group</h2>
+            <p>A gravitationally bound galaxy group containing around 80 members, including the Milky Way, Andromeda, and Triangulum galaxies. It spans roughly 10 million light-years.</p>
+        </div>
+    </section>
+
+    <!-- Level 6: Virgo Supercluster -->
+    <section class="zoom-level" id="virgo-supercluster" data-level="5">
+        <div class="level-bg"></div>
+        <div class="level-content">
+            <h2>Virgo Supercluster</h2>
+            <p>A massive collection of galaxy clusters. The Local Group lies on its outskirts, while the Virgo Cluster — containing over 1,300 galaxies — forms its dense central region.</p>
+        </div>
+    </section>
+
+    <!-- Level 7: Laniakea Supercluster -->
+    <section class="zoom-level" id="laniakea" data-level="6">
+        <div class="level-bg"></div>
+        <div class="level-content">
+            <h2>Laniakea Supercluster</h2>
+            <p>An enormous cosmic structure spanning about 520 million light-years and containing over 100,000 galaxies, all flowing gravitationally toward a region known as the Great Attractor.</p>
+        </div>
+    </section>
+
+    <!-- Level 8: Observable Universe -->
+    <section class="zoom-level" id="observable-universe" data-level="7">
+        <div class="level-bg"></div>
+        <div class="level-content">
+            <h2>Observable Universe</h2>
+            <p>The region of the cosmos from which light has reached Earth since the Big Bang — about 93 billion light-years across and containing roughly 2 trillion galaxies.</p>
+        </div>
+    </section>
+
+    <!-- Level 9: Cosmic Web -->
+    <section class="zoom-level" id="cosmic-web" data-level="8">
+        <div class="level-bg"></div>
+        <div class="level-content">
+            <h2>Cosmic Web</h2>
+            <p>The large-scale structure of the universe — a vast interconnected network of galaxy filaments, clusters, and enormous empty voids shaped by dark matter and dark energy.</p>
+        </div>
+    </section>
+
+    <!-- Level 10: Universe -->
+    <section class="zoom-level" id="universe" data-level="9">
+        <div class="level-bg"></div>
+        <div class="level-content">
+            <h2>Universe</h2>
+            <p>The totality of all space, time, energy, and matter, including the observable regions and the unknown expanses beyond our cosmic horizon.</p>
+        </div>
+    </section>
+
+    <!-- Level 11: Multiverse (Farthest) -->
+    <section class="zoom-level" id="multiverse" data-level="10">
+        <div class="level-bg"></div>
+        <div class="level-content">
+            <h2>Multiverse</h2>
+            <p>A speculative concept proposing that our universe may be one of countless others — each potentially with different physical laws, dimensions, or origins.</p>
+        </div>
+    </section>
+</main>
+
+
+    <!-- Welcome Overlay -->
+    <div class="welcome-overlay active">
+        <div class="welcome-box">
+            <h1>Cosmic Zoom</h1>
+            <p class="subtitle">From Earth to the Multiverse</p>
+            <p class="instruction">Journey through 11 cosmic scales from our planet to theoretical multiverses.</p>
+            <button id="begin-btn" class="cta-btn">Begin Journey <i class="fas fa-rocket"></i></button>
+            <p class="hint">Use scroll wheel, arrow keys, or touch swipe</p>
+        </div>
+    </div>
+
+    <!-- Audio Element (hidden) -->
+    <audio id="space-audio" loop preload="auto">
+        <source src="assets/audio/space.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,615 @@
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    cursor: none !important; /* Hide default cursor */
+}
+
+body {
+    font-family: 'Exo 2', sans-serif;
+    background: #000;
+    color: #fff;
+    overflow: hidden;
+    height: 100vh;
+}
+
+/* ===== ENHANCED SPACESHIP CURSOR ===== */
+.custom-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 30px; /* Increased from 60px */
+    height: 30px; /* Increased from 60px */
+    z-index: 9999;
+    pointer-events: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><defs><linearGradient id="engineGrad" x1="50%" y1="0%" x2="50%" y2="100%"><stop offset="0%" style="stop-color:%23ff0000;stop-opacity:1"/><stop offset="100%" style="stop-color:%23ff9900;stop-opacity:1"/></linearGradient><linearGradient id="bodyGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%2300ccff;stop-opacity:1"/><stop offset="100%" style="stop-color:%230066ff;stop-opacity:1"/></linearGradient><radialGradient id="glowGrad"><stop offset="0%" style="stop-color:%23ffffff;stop-opacity:0.8"/><stop offset="100%" style="stop-color:%2300ccff;stop-opacity:0"/></radialGradient></defs><g transform="translate(60,60) rotate(0)"><!-- Main body --><path d="M-30,-45 L-50,15 L-25,25 L0,45 L25,25 L50,15 L30,-45 Z" fill="url(%23bodyGrad)" stroke="%23ffffff" stroke-width="3" stroke-linejoin="round"/><!-- Cockpit --><ellipse cx="0" cy="-25" rx="15" ry="10" fill="%23000000" stroke="%23ffffff" stroke-width="2"/><ellipse cx="0" cy="-25" rx="10" ry="6" fill="%2300ccff" opacity="0.6"/><!-- Wings --><path d="M-40,0 L-60,10 L-50,25 L-25,15" fill="url(%23bodyGrad)" stroke="%23ffffff" stroke-width="2" opacity="0.9"/><path d="M40,0 L60,10 L50,25 L25,15" fill="url(%23bodyGrad)" stroke="%23ffffff" stroke-width="2" opacity="0.9"/><!-- Engine glow --><ellipse cx="0" cy="40" rx="15" ry="25" fill="url(%23engineGrad)" opacity="0.8"><animate attributeName="rx" values="15;20;15" dur="0.5s" repeatCount="indefinite"/><animate attributeName="ry" values="25;30;25" dur="0.5s" repeatCount="indefinite"/></ellipse><!-- Engine core --><ellipse cx="0" cy="40" rx="8" ry="15" fill="%23ffffff"><animate attributeName="fill" values="%23ffffff;%23ffff00;%23ffffff" dur="0.3s" repeatCount="indefinite"/></ellipse></g></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    transform: translate(-50%, -50%) rotate(0deg);
+    transition: transform 0.08s ease;
+    filter: drop-shadow(0 0 25px rgba(0, 210, 255, 0.9)) 
+            drop-shadow(0 0 40px rgba(0, 100, 255, 0.7));
+}
+
+.custom-cursor.boost {
+    filter: drop-shadow(0 0 35px rgba(255, 0, 0, 0.9))
+            drop-shadow(0 0 60px rgba(255, 100, 0, 0.8))
+            drop-shadow(0 0 80px rgba(255, 200, 0, 0.6));
+    animation: boostPulse 0.4s infinite alternate;
+}
+
+@keyframes boostPulse {
+    0% { 
+        transform: translate(-50%, -50%) scale(1); 
+        filter: drop-shadow(0 0 35px rgba(255, 0, 0, 0.9))
+                drop-shadow(0 0 60px rgba(255, 100, 0, 0.8));
+    }
+    100% { 
+        transform: translate(-50%, -50%) scale(1.15); 
+        filter: drop-shadow(0 0 45px rgba(255, 50, 0, 1))
+                drop-shadow(0 0 70px rgba(255, 150, 0, 0.9))
+                drop-shadow(0 0 100px rgba(255, 200, 0, 0.7));
+    }
+}
+
+/* ===== ENHANCED SMOKE TRAIL ===== */
+.trail-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 9998;
+    overflow: hidden;
+}
+
+.trail-particle {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0;
+    border-radius: 50%;
+    mix-blend-mode: screen; /* Creates glowing effect */
+}
+
+/* Engine trail particles */
+.trail-particle.engine-trail {
+    background: radial-gradient(circle, 
+        rgba(255, 100, 0, 0.9) 0%, 
+        rgba(255, 200, 0, 0.6) 30%, 
+        rgba(255, 255, 255, 0) 70%);
+    animation: engineTrailFade 1.5s ease-out forwards;
+}
+
+/* Smoke trail particles */
+.trail-particle.smoke {
+    background: radial-gradient(circle, 
+        rgba(255, 255, 255, 0.8) 0%, 
+        rgba(200, 200, 200, 0.5) 20%, 
+        rgba(100, 100, 100, 0.2) 40%, 
+        rgba(0, 0, 0, 0) 70%);
+    animation: smokeTrailFade 2s ease-out forwards;
+}
+
+/* Star trail particles */
+.trail-particle.star {
+    background: radial-gradient(circle, 
+        rgba(255, 255, 255, 1) 0%, 
+        rgba(200, 220, 255, 0.6) 40%, 
+        rgba(100, 150, 255, 0.2) 70%, 
+        rgba(0, 0, 0, 0) 100%);
+    animation: starTrailFade 1s ease-out forwards;
+}
+
+/* Trail animations */
+@keyframes engineTrailFade {
+    0% {
+        opacity: 0.9;
+        transform: translate(0, 0) scale(0.5);
+        filter: blur(0px);
+    }
+    50% {
+        opacity: 0.6;
+        transform: translate(var(--tx), var(--ty)) scale(1);
+        filter: blur(2px);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(calc(var(--tx) * 2), calc(var(--ty) * 2)) scale(0.5);
+        filter: blur(5px);
+    }
+}
+
+@keyframes smokeTrailFade {
+    0% {
+        opacity: 0.7;
+        transform: translate(0, 0) scale(0.5);
+        filter: blur(0px);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--tx), var(--ty)) scale(1);
+        filter: blur(8px);
+    }
+}
+
+@keyframes starTrailFade {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(0.5);
+        filter: blur(0px);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--tx), var(--ty)) scale(1);
+        filter: blur(3px);
+    }
+}
+
+/* ===== UI ELEMENTS ===== */
+.ui-btn {
+    position: fixed;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s;
+}
+
+.ui-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.sound-btn {
+    top: 0px;
+    right: 25px;
+}
+
+/* Progress Indicator */
+.progress-container {
+    position: fixed;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 999;
+    height: 70vh;
+    display: flex;
+    align-items: center;
+}
+
+.progress-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+}
+
+.progress-line::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, 
+        #6a11cb, 
+        #2575fc, 
+        #00d2ff, 
+        #36d1dc, 
+        #5b86e5, 
+        #8a2387, 
+        #f27121);
+    z-index: -1;
+}
+
+.progress-dot {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    transition: all 0.5s;
+}
+
+.progress-dot.active {
+    border-color: #00d2ff;
+    box-shadow: 0 0 15px #00d2ff;
+    transform: scale(1.2);
+    background: rgba(0, 210, 255, 0.1);
+}
+
+/* Scroll Hint */
+.scroll-hint {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 998;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    animation: bounce 7s infinite;
+}
+
+.scroll-hint i {
+    font-size: 1.2rem;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(10px); }
+}
+
+/* Information Panel */
+.info-panel {
+    position: fixed;
+    bottom: 80px;
+    left: 50px;
+    max-width: 300px;
+    z-index: 997;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    border-left: 4px solid #36d1dc;
+    padding: 25px;
+    border-radius: 0 15px 15px 0;
+    transform: translateX(-100%);
+    opacity: 0;
+    transition: all 0.8s ease;
+}
+
+.info-panel.visible {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.level-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2rem;
+    margin-bottom: 10px;
+    background: linear-gradient(to right, #36d1dc, #5b86e5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.level-description {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 15px;
+    color: #ccc;
+}
+
+.scale {
+    font-size: 0.9rem;
+    color: #8a2387;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 10px;
+}
+
+.scale-label {
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+/* ===== ZOOM CONTAINER ===== */
+.zoom-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    perspective: 1000px;
+}
+
+.zoom-level {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transform: scale(0.5) translateZ(-1000px);
+    transition: opacity 1.5s, transform 2.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.zoom-level.active {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
+}
+
+.level-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    filter: brightness(1.3);
+}
+
+/* Background images */
+#earth .level-bg { 
+    background: 
+        
+        url('earth.jpeg');
+    background-size: cover;
+    background-position: center;
+}
+
+#solar-system .level-bg { 
+    background: 
+        
+        url('galaxy.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+#orion-arm .level-bg { 
+    background: 
+        
+        url('orionarm.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+#milky-way .level-bg { 
+    background: 
+        
+        url('milkyway.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+#local-group .level-bg { 
+    background: 
+        
+        url('localgr.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+#virgo-supercluster .level-bg { 
+    background: 
+        
+        url('virgosup.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+#laniakea .level-bg { 
+    background: 
+        
+        url('Laniakea.png');
+    background-size: cover;
+    background-position: center;
+}
+
+#observable-universe .level-bg { 
+    background: 
+        
+        url('observeu.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+#cosmic-web .level-bg { 
+    background: 
+        
+        url('cosmic.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+#universe .level-bg { 
+    background: 
+        
+        url('universe.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+#multiverse .level-bg { 
+    background: 
+        
+        url('multiverse.jpg');
+    background-size: cover;
+    background-position: center;
+}
+
+.level-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    max-width: 800px;
+    padding: 40px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 20px;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.level-content h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 3rem;
+    margin-bottom: 20px;
+    color: #fff;
+}
+
+.level-content p {
+    font-size: 1.3rem;
+    line-height: 1.6;
+    color: #ddd;
+}
+
+/* ===== WELCOME OVERLAY ===== */
+.welcome-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, #000428, #004e92);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 1s, visibility 1s;
+}
+
+.welcome-overlay:not(.active) {
+    opacity: 0;
+    visibility: hidden;
+}
+
+.welcome-box {
+    text-align: center;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 60px;
+    border-radius: 30px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    max-width: 700px;
+    backdrop-filter: blur(15px);
+}
+
+.welcome-box h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 4rem;
+    background: linear-gradient(to right, #00d2ff, #3a7bd5);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 10px;
+}
+
+.subtitle {
+    font-size: 1.5rem;
+    color: #ccc;
+    margin-bottom: 30px;
+}
+
+.instruction {
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+    color: #aaa;
+}
+
+.cta-btn {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    border: none;
+    color: white;
+    padding: 18px 45px;
+    font-size: 1.3rem;
+    border-radius: 50px;
+    font-family: 'Exo 2', sans-serif;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.cta-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(106, 17, 203, 0.7);
+}
+
+.hint {
+    margin-top: 30px;
+    font-size: 0.9rem;
+    color: #888;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .custom-cursor {
+        display: none; /* Hide custom cursor on mobile */
+    }
+    
+    * {
+        cursor: auto !important; /* Restore default cursor on mobile */
+    }
+    
+    .info-panel {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+        bottom: 100px;
+    }
+    
+    .level-title {
+        font-size: 2rem;
+    }
+    
+    .progress-container {
+        right: 15px;
+    }
+    
+    .progress-dot {
+        width: 30px;
+        height: 30px;
+        font-size: 1rem;
+    }
+    
+    .welcome-box {
+        padding: 40px 20px;
+        margin: 20px;
+    }
+    
+    .welcome-box h1 {
+        font-size: 2.5rem;
+    }
+}
+
+/* Large screens enhancement */
+@media (min-width: 1600px) {
+    .custom-cursor {
+        width: 140px;
+        height: 140px;
+    }
+    
+    .progress-dot {
+        width: 45px;
+        height: 45px;
+        font-size: 1.5rem;
+    }
+}
+
+/* Performance optimization for slower devices */
+@media (prefers-reduced-motion: reduce) {
+    .custom-cursor,
+    .trail-particle {
+        animation: none !important;
+        transition: none !important;
+    }
+    
+    .scroll-hint {
+        animation: none !important;
+    }
+}
+
+
+@media (max-width: 600px) {
+    .info-panel {
+        display: none !important;
+    }
+}
