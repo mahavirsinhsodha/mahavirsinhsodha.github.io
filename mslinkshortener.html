@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Link Shortener — Single File</title>
+<style>
+  :root{--bg:#f5f7ff;--card:#fff;--accent:#4A7CFF;--muted:#667;--ok:#1aab4b;--err:#e04b4b}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#eef3ff,#fff);display:flex;align-items:center;justify-content:center;padding:24px}
+  .card{width:420px;background:var(--card);padding:20px;border-radius:12px;box-shadow:0 8px 30px rgba(40,50,80,0.08)}
+  h1{margin:0 0 12px;font-size:18px}
+  .row{display:flex;gap:8px}
+  input{flex:1;padding:10px;border-radius:8px;border:1px solid #d2d7f0;font-size:14px}
+  button{padding:10px 12px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer}
+  #result{margin-top:12px;padding:10px;border-radius:8px;background:#f3f7ff;font-size:14px;word-break:break-all}
+  .muted{color:var(--muted);font-size:13px;margin-top:8px}
+  .tiny{font-size:12px;color:var(--muted);margin-left:8px}
+  .flex{display:flex;align-items:center;gap:8px}
+  .status{font-weight:600}
+  .copyBtn{background:#fff;border:1px solid #d2d7f0;padding:6px 8px;border-radius:6px;cursor:pointer}
+  .error{color:var(--err)}
+  .ok{color:var(--ok)}
+</style>
+</head>
+<body>
+  <div class="card" role="main">
+    <h1>🔗 Link Shortener</h1>
+
+    <div class="row">
+      <input id="inputURL" placeholder="Paste a long URL (e.g. example.com or https://site.com)" aria-label="URL input">
+      <button id="shortenBtn">Shorten</button>
+    </div>
+
+    <div id="result" hidden></div>
+    <div class="muted">No backend — using <strong>is.gd</strong> API. Works offline in your browser if opened over HTTP(S).</div>
+  <p style="text-align: center;">
+&copy; 2025 MS Corporation - All Rights Reserved.
+</p></div>
+
+<script>
+const shortenBtn = document.getElementById('shortenBtn');
+const input = document.getElementById('inputURL');
+const result = document.getElementById('result');
+
+function show(msg, type){
+  result.hidden = false;
+  result.innerHTML = msg;
+  result.classList.toggle('error', type === 'error');
+  result.classList.toggle('ok', type === 'ok');
+}
+
+function validateUrl(v){
+  try{
+    // allow naked domains by auto-prepending https later; quick sanity check:
+    const test = v.startsWith('http') ? new URL(v) : new URL('https://' + v);
+    return test.href;
+  }catch(e){ return null; }
+}
+
+async function shorten(){
+  const raw = input.value.trim();
+  if(!raw){ show('Please paste a URL.', 'error'); return; }
+
+  const fixed = validateUrl(raw);
+  if(!fixed){ show('Invalid URL format.', 'error'); return; }
+
+  show('Generating… <span class="tiny">(network request)</span>');
+  shortenBtn.disabled = true;
+
+  try{
+    // Use is.gd with JSON response to get structured data
+    const api = 'https://is.gd/create.php?format=json&url=' + encodeURIComponent(fixed);
+    const res = await fetch(api, {method:'GET'});
+    if(!res.ok) throw new Error('Network response ' + res.status);
+
+    const data = await res.json();
+    if(data.errorcode){
+      show('API error: ' + (data.errormessage || 'unknown'), 'error');
+    } else if(data.shorturl){
+      // show short URL + copy button
+      result.hidden = false;
+      result.innerHTML = `
+        <div class="flex">
+          <div style="flex:1">
+            <div class="status">Short URL</div>
+            <a id="shortLink" href="${data.shorturl}" target="_blank" rel="noopener">${data.shorturl}</a>
+            <div class="tiny">Original: ${fixed}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button id="copyBtn" class="copyBtn">Copy</button>
+            <button id="openBtn" class="copyBtn">Open</button>
+          </div>
+        </div>
+      `;
+      document.getElementById('copyBtn').onclick = async () => {
+        try{
+          await navigator.clipboard.writeText(data.shorturl);
+          show('Copied to clipboard ✅', 'ok');
+        }catch(e){
+          show('Copy failed — select and copy manually.', 'error');
+        }
+      };
+      document.getElementById('openBtn').onclick = () => window.open(data.shorturl, '_blank');
+    } else {
+      show('Unexpected API response.', 'error');
+    }
+  }catch(err){
+    // Common failure reasons: network, mixed-content (if page served over http and API blocked), CORS (rare), offline
+    show('Request failed: ' + (err.message || err), 'error');
+    console.error(err);
+  } finally {
+    shortenBtn.disabled = false;
+  }
+}
+
+shortenBtn.addEventListener('click', shorten);
+input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') shorten(); });
+</script>
+
+</body>
+</html>
