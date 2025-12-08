@@ -551,6 +551,36 @@
     .close-modal:hover {
       color: white;
     }
+
+
+    /* 🔥 Mobile Fix */
+@media (max-width: 480px) {
+  html, body {
+    overflow-x: auto !important;
+  }
+
+  .app {
+    display: block !important;
+    padding: 10px;
+  }
+
+  .panel {
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  .charts canvas {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  table.tx-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
   </style>
 </head>
 <body>
