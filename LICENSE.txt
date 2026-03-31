@@ -2,7 +2,7 @@ MS Corporation – Website License & Privacy Agreement
 Version 21.0 | Last Updated: January 2026
 
 1. Ownership & Copyright
-All content available on https://mscorp7.github.io/ 
+All content available on https://mahavirsinhsodha.github.io/ 
 including but not limited to text, source code, design, layout, graphics, animations, and media files, is the exclusive intellectual property of MS Corporation, a sole proprietorship, unless otherwise stated.
 © 2017–2026 MS Corporation. All rights reserved.
 
@@ -81,7 +81,7 @@ For permissions, licensing inquiries, or privacy concerns, contact:
 संस्करण 21.0 | अंतिम अपडेट: जनवरी 2026
 
 1. स्वामित्व एवं कॉपीराइट
-https://mscorp7.github.io/
+https://mahavirsinhsodha.github.io/
  पर उपलब्ध सभी सामग्री, जिनमें पाठ, स्रोत कोड, डिज़ाइन, लेआउट, ग्राफ़िक्स, एनिमेशन और मीडिया फ़ाइलें शामिल हैं (परंतु इन्हीं तक सीमित नहीं), जब तक अन्यथा उल्लेख न किया गया हो, एमएस कॉर्पोरेशन (एक एकल स्वामित्व संस्था) की विशिष्ट बौद्धिक संपत्ति हैं।
 
 © 2017–2026 एमएस कॉर्पोरेशन। सर्वाधिकार सुरक्षित।
