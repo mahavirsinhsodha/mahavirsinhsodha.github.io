@@ -1,0 +1,254 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MS</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Poppins',sans-serif;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(180deg,#ffffff,#f7fbff);
+    overflow:hidden;
+    padding:20px;
+}
+
+/* Background */
+
+.bg-circle{
+    position:absolute;
+    border-radius:50%;
+    filter:blur(80px);
+    z-index:0;
+}
+
+.circle1{
+    width:350px;
+    height:350px;
+    background:#dbeafe;
+    top:-120px;
+    left:-120px;
+}
+
+.circle2{
+    width:400px;
+    height:400px;
+    background:#e0f2fe;
+    bottom:-150px;
+    right:-150px;
+}
+
+.card{
+    position:relative;
+    z-index:2;
+    width:100%;
+    max-width:800px;
+    text-align:center;
+    background:rgba(255,255,255,0.8);
+    backdrop-filter:blur(10px);
+    border:1px solid #e5f0ff;
+    border-radius:30px;
+    padding:50px 30px;
+    box-shadow:0 20px 60px rgba(59,130,246,.08);
+}
+
+.logo{
+    width:110px;
+    height:110px;
+    margin:0 auto 25px;
+    border-radius:24px;
+    background:linear-gradient(135deg,#60a5fa,#3b82f6);
+    color:#fff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:38px;
+    font-weight:700;
+    letter-spacing:2px;
+}
+
+.owner{
+    color:#60a5fa;
+    font-size:.9rem;
+    font-weight:600;
+    letter-spacing:2px;
+    text-transform:uppercase;
+}
+
+h1{
+    margin-top:15px;
+    font-size:4rem;
+    color:#2563eb;
+    line-height:1;
+}
+
+.jp{
+    margin-top:15px;
+    font-family:'Noto Sans JP',sans-serif;
+    color:#60a5fa;
+    font-size:1.4rem;
+}
+
+.status{
+    margin-top:25px;
+    display:inline-block;
+    padding:12px 24px;
+    border-radius:50px;
+    background:#eff6ff;
+    border:1px solid #bfdbfe;
+    color:#2563eb;
+    font-weight:600;
+}
+
+.desc{
+    margin-top:25px;
+    color:#7aa8d8;
+    font-size:1.05rem;
+    line-height:1.8;
+}
+
+.progress-box{
+    width:100%;
+    max-width:450px;
+    margin:35px auto 0;
+}
+
+.progress-bg{
+    height:10px;
+    background:#dbeafe;
+    border-radius:100px;
+    overflow:hidden;
+}
+
+.progress{
+    height:100%;
+    width:0;
+    background:linear-gradient(90deg,#60a5fa,#2563eb);
+    border-radius:100px;
+}
+
+.progress-text{
+    margin-top:10px;
+    color:#7aa8d8;
+    font-size:.9rem;
+}
+
+.footer{
+    margin-top:35px;
+    color:#9ab8d8;
+    font-size:.85rem;
+}
+
+/* Responsive */
+
+@media(max-width:768px){
+
+    h1{
+        font-size:2.5rem;
+    }
+
+    .jp{
+        font-size:1rem;
+    }
+
+    .desc{
+        font-size:.95rem;
+    }
+
+    .card{
+        padding:40px 20px;
+    }
+
+    .logo{
+        width:90px;
+        height:90px;
+        font-size:30px;
+    }
+}
+
+</style>
+</head>
+<body>
+
+<div class="bg-circle circle1"></div>
+<div class="bg-circle circle2"></div>
+
+<div class="card">
+
+    <div class="logo">MS</div>
+
+    <div class="owner">
+        Mahavirsinh Sodha's
+    </div>
+
+    <h1>UNDER CONSTRUCTION</h1>
+
+    <div class="jp">
+        モダンソリューションズ株式会社
+    </div>
+
+    <div class="status">
+        Website Coming Soon
+    </div>
+
+    <div class="desc">
+        We're building something better.<br>
+        Thank you for visiting. Please check back soon.
+    </div>
+
+    <div class="progress-box">
+        <div class="progress-bg">
+            <div class="progress" id="progress"></div>
+        </div>
+        <div class="progress-text" id="progressText">
+            Preparing for launch...
+        </div>
+    </div>
+
+    <div class="footer">
+        © 2026 Modern Solutions. All Rights Reserved.
+    </div>
+
+</div>
+
+<script>
+
+const progress = document.getElementById("progress");
+const text = document.getElementById("progressText");
+
+let value = 0;
+
+const timer = setInterval(() => {
+
+    value++;
+
+    progress.style.width = value + "%";
+
+    if(value >= 90){
+        clearInterval(timer);
+        text.innerHTML = "Launch coming soon.";
+    }
+
+}, 40);
+
+</script>
+
+</body>
+</html>
+
